@@ -11,7 +11,7 @@
 	- filter list of domain objects by common settings such as 'retention', 'stripOnSuccess', or by process and client properties like 'logLevel', 'exclude', 'logMode', 'version' of nJAMS Clients, etc.
 	- allows RegEx in filter criteria for more precise hits
 	- supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
-	- script runs on Windows, Linux, and MacOS using Powershell Core 7 or Windows Powershell 5
+	- script runs on Windows, Linux, and macOS using Powershell Core 7 or Windows Powershell 5
     - output can be formatted individually by common Powershell format commands
 
 .PARAMETER instance
