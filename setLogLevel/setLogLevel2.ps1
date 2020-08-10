@@ -122,7 +122,12 @@ function fnSetLogLevel ([string]$doId, [string]$doType) {
 
     # Determine request body to set log level:
     $myLogLevel = '{ "logLevel": "' + $domainObjectLogLevel + '" }'
-
+    # Header for domainobject/refresh request that acceppts application/json:
+    $myHeaderAcceptJson = @{
+        "Authorization" = "Basic"+[System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes('"$username:$password"')) 
+        "Accept" = "application/json"
+    }
+    
     # Walk through domain object hierarchy starting from object of given id and type:
     Foreach ($do in $domainObjects)
     {
@@ -132,24 +137,20 @@ function fnSetLogLevel ([string]$doId, [string]$doType) {
             if ([string]$do.type -like "*process*" -and $do.name -match $filterProcess) {
 
                 if ($list) {
-                    $myHeaderAcceptJson = @{
-                        "Authorization" = "Basic"+[System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes('"$username:$password"')) 
-                        "Accept" = "application/json"
-                    }
-                    
                     if ($PSVersionTable.PSEdition -eq "Core") {
-                        $processDomainObject = Invoke-RestMethod -Method GET -Header $myHeader -ContentType "application/json" -SkipCertificateCheck -uri "$instance/api/domainobject/refresh/$($do.id)" -WebSession $mySession
+                        $processDomainObject = Invoke-RestMethod -Method GET -Header $myHeaderAcceptJson -ContentType "application/json" -SkipCertificateCheck -uri "$instance/api/domainobject/refresh/$($do.id)" -WebSession $mySession
                     }
                     else {
-                        $processDomainObject = Invoke-RestMethod -Method GET -Header $myHeaderAcceptJson -ContentType "application/json" -uri "$instance/api/domainobject/refresh/555" -WebSession $mySession
+                        $processDomainObject = Invoke-RestMethod -Method GET -Header $myHeaderAcceptJson -ContentType "application/json" -uri "$instance/api/domainobject/refresh/$($do.id)" -WebSession $mySession
                     }
-                    # Write-Output "Category: $($processDomainObject.category), LogLevel: $($processDomainObject.logLevel), Exclude: $($processDomainObject.exclude), StripOnSuccess: $($processDomainObject.stripOnSuccess), Retention: $($processDomainObject.retention), DO: $($do.id) $($do.path)"
+
                     $outputDO = New-Object PSObject -Property @{
                         Id                  = $($do.id)
                         Name                = $($do.name)
                         'LogLevel'          = $($processDomainObject.logLevel)
                         Path                = $($do.path)
                     }
+
                     write-output $outputDO
                 }
                 else {
@@ -165,13 +166,13 @@ function fnSetLogLevel ([string]$doId, [string]$doType) {
         }
         # If there are children items available:
         else {
-            # Inspect next level for processes to change log level for:
+            # Inspect next level for domain objects to change log level for:
             fnSetLogLevel "$($do.id)" "$($do.objectType)"
         }
     }
 }
 
-# General header for request:
+# General header for requests:
 $myHeader = @{
     "Authorization" = "Basic"+[System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes('"$username:$password"')) 
 }
@@ -222,8 +223,8 @@ try {
         write-host "You are going to change the log level of all processes of path '$domainObjectPath' and all of its sub elements." -ForegroundColor Yellow
         $input = read-host "Do you want to proceed? [Y] Yes  [N] No"
         if ($input.ToLower() -ne "y" -and $input.ToLower() -ne "yes") {
-
             write-host "No change of log level."
+
             Exit
         }
     }
