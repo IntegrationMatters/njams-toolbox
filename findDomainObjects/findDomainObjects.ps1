@@ -168,10 +168,10 @@ $allProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
 [System.Net.ServicePointManager]::SecurityProtocol = $allProtocols
 }
 
-# Loop each elements and compare log level:
+# Recursively loop each element:
 function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
 
-        # If id is 0, just send object type, otherwise send id and object type:
+    # If id is 0, just send object type, otherwise send id and object type:
     if($doId -eq "0") {
         $myRequestBody = '{ "objectType": "' + $doType + '" }'
     }
