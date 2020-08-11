@@ -29,10 +29,10 @@
 .PARAMETER domainObjectPath
     Specifies the domain object path, e.g. ">domain>deployment>engine>". This path is searched for domain objects for which the log level should be changed. This parameter is mandatory. 
 
-.PARAMETER logLevel
+.PARAMETER domainObjectLogLevel
     Specifies the 'logLevel' for a domain object. Must contain one of these values: "INFO", "SUCCESS", "WARNING", or "ERROR". This parameter is mandatory.
 
-.PARAMETER filter
+.PARAMETER domainObjectFilter
     Filters domain objects by name of the specified domain object path. Use RegEx for filter criterion to limit process selection. This parameter is optional.
     
 .PARAMETER list
@@ -65,7 +65,7 @@ param (
     [Parameter(Mandatory=$true)][string]$username = "admin",
 	[Parameter(Mandatory=$true)][string]$password = "admin",
 	[Parameter(Mandatory=$true)][string][Alias("path")]$domainObjectPath,
-	[string][Alias("filter")]$filterProcess = ".*",
+	[string][Alias("filter")]$domainObjectFilter = ".*",
 	[Parameter(Mandatory=$true)][string][ValidateSet("INFO", "SUCCESS", "WARNING", "ERROR")][Alias("logLevel")]$domainObjectLogLevel, # INFO | SUCCESS | WARNING | ERROR
     [switch]$list
 )

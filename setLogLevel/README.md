@@ -24,7 +24,7 @@ SYNTAX
     ./setLogLevel.ps1 [-instance] <String> 
                       [-username] <String> [-password] <String> 
                       [-domainObjectPath] <String> 
-                      [[-filterProcess] <String>] 
+                      [[-domainObjectFilter] <String>] 
                       [-domainObjectLogLevel] <String> 
                       [-list] [<CommonParameters>]
 ```
@@ -66,7 +66,7 @@ Run `./setLogLevel.ps1 -?` to learn more about how to use the script.
 
 * Windows:
 
-  This script requires either *Windows PowerShell 5*, respectively *PowerShell 7* or higher. Please follow these instructions to install Powershell 7 on Linux/Unix:
+  This script requires *Windows PowerShell 5*, respectively *PowerShell 7* or higher. Please follow these instructions to install Powershell 7 on Linux/Unix:
   https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows?view=powershell-7
 
 * macOS:
