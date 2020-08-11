@@ -10,10 +10,10 @@
 
     Characteristics:
     - find domain objects of an nJAMS instance
-	- filter list of domain objects by common settings such as 'retention', 'stripOnSuccess', or by process and client properties like 'logLevel', 'exclude', 'logMode', 'version' of nJAMS Clients, etc.
-	- allows RegEx in filter criteria for more precise hits
-	- supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
-	- script runs on Linux and macOS using PowerShell 7 or on Windows using Windows PowerShell 5 or PoweShell 7
+    - filter list of domain objects by common settings such as 'retention', 'stripOnSuccess', or by process and client properties like 'logLevel', 'exclude', 'logMode', 'version' of nJAMS Clients, etc.
+    - allows RegEx in filter criteria for more precise hits
+    - supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
+    - script runs on Linux and macOS using PowerShell 7 or on Windows using Windows PowerShell 5 or PoweShell 7
     - output can be formatted individually by common PowerShell format commands
 
 .PARAMETER instance
@@ -62,6 +62,7 @@
 .EXAMPLE
     ./findDomainObjects.ps1 -instance "http://localhost:8080/njams" -username "admin" -password "admin"
     Finds all domain objects of an instance by using specified credentials.
+    
     You can automatically format the list for tabular output using format cmdlet:
     ./findDomainObjects.ps1 -instance "http://localhost:8080/njams" -username "admin" -password "admin" | format-table
 
@@ -338,7 +339,7 @@ try {
     # Browse domain objects:
     fnBrowseDomainObjects "$startDoId" "$startDoType"
 
-    write-host "Finished." 
+    write-output "Finished." 
 }
 catch {
     write-host "Unable to retrieve domain objects from nJAMS instance due to:" -ForegroundColor Red
