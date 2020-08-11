@@ -1,15 +1,15 @@
 <#
 .SYNOPSIS
-    Set log level for processes of a given domain object path.
+    Set log level for domain objects of a given domain object path.
 .DESCRIPTION
-	This script changes the log level of processes related to a specified domain object path including its sub elements.
+	This script changes the log level of domain objects related to a specified domain object path including its sub elements.
 	The log level can be set to INFO, SUCCESS, WARNING, or ERROR.
-	The script requires to enter the URL of your nJAMS Server instance, including username and password, the domain object path that contains the processes you want to change log level for, and the new log level. 
+	The script requires to enter the URL of an nJAMS Server instance, including username and password, the domain object path that contains the domain objects that should be applied with new log level, and the new log level. 
 	The script can be executed on any Windows, Linux, or Mac machine within the same network of the machine, where nJAMS Server is running.
 	Characteristics:
-	- allows to change log level for a bunch of processes
-	- allows RegEx in filter criteria to limit processes of a domain object path
-	- parameter "list" allows to only display the list of selected processes for which the log level should be changed without changing the log level.
+	- allows to change log level for a bunch of domain objects
+	- allows RegEx in filter criterion to limit domain object selection of domain object path
+	- parameter "list" allows to only list selected domain objects for which the log level should be changed without changing the log level.
 	- supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
 	- script runs on Windows, Linux, and macOS using Powershell Core 7 or Windows Powershell 5
 	- output can be formatted individually by common Powershell format commands
@@ -33,20 +33,21 @@
     Specifies the 'logLevel' for a domain object. Must contain one of these values: "INFO", "SUCCESS", "WARNING", or "ERROR". This parameter is mandatory.
 
 .PARAMETER filter
-    Filters domain objects by name of the specified domain object path. Use RegEx for the filter criterion. This parameter is optional.
+    Filters domain objects by name of the specified domain object path. Use RegEx for filter criterion to limit process selection. This parameter is optional.
     
 .PARAMETER list
-    When this parameter is specified, the log level will NOT be applied, but only a list of matching domain objects will be returned. This is useful for checking the filter criterion. This parameter is optional.
+    When this parameter is specified, the script virtually simulates setting the log level. The log level will NOT be applied, but only a list of matching domain objects will be returned. This is useful for checking the filter criterion. This option also checks corresponding nJAMS Client(s) for availabilty. This parameter is optional.
 
-.PARAMETER check
-    When this parameter is specified, the script virtually simulates setting the log level. It determines the domain objects and checks the coresponding nJAMS Client for availability. This parameter is optional.
+.EXAMPLE
+    ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">prod>finance>invoicing>" -loglevel "ERROR"
+    Sets log level to "ERROR" for all domain objects of domain object path ">prod>finance>invoicing>"and its sub elements.
     
 .EXAMPLE
-    ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">prod>finance>invoicing>" -filter "Starter.*" -loglevel "ERROR"
-    Sets log level to "ERROR" for domain objects whose names begin with "Starter" of domain object path ">prod>finance>invoicing>".
+    ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">prod>finance>invoicing>" -filter "Order.*" -loglevel "ERROR"
+    Sets log level to "ERROR" for domain objects whose names begin with "Order" of domain object path ">prod>finance>invoicing>".
 
 .EXAMPLE
-    ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">test>" -filter ".*TargetSAP.*" -list
+    ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">test>" -loglevel "ERROR" -filter ".*TargetSAP.*" -list
     Lists matching domain objects, while checking communication to nJAMS Client(s). Log level settings remain unchanged. 
 	
 .LINK
@@ -68,17 +69,6 @@ param (
 	[Parameter(Mandatory=$true)][string][ValidateSet("INFO", "SUCCESS", "WARNING", "ERROR")][Alias("logLevel")]$domainObjectLogLevel, # INFO | SUCCESS | WARNING | ERROR
     [switch]$list
 )
-
-# -------------------------------------------------------
-# Declare global variables:
-# nJAMS instance:
-<#
-$njamsInstanceUrl = "http://10.189.0.137:8080/njams"
-$njamsUser = "admin"
-$njamsPW = "admin"
-$domainObjectPath = "%3Edomain%3Edeployment%3ESupport%3E"
-$domainObjectLogLevel = "INFO" # INFO | SUCCESS | WARNING | ERROR
-#>
 
 # Change policy to trust all certificates, just in case you are using TLS/HTTPS:
 # Use -SkipCertificateCheck in "Invoke-RestMethod" instead, when you are on PScore.
@@ -178,6 +168,7 @@ $myHeader = @{
 }
 
 # (1) Login as admin:
+#
 $myBody = '{ "username": "' + $username + '" , ' + '"password": "' + $password + '" }'
 $mySession = $null #empty variable session
 try {
@@ -195,7 +186,8 @@ catch {
 	Exit
 }
 
-# (2) Get domaqin object id of given domain object path:
+# (2) Get domain object id of given domain object path:
+#
 $myRequestBody = '{ "objectType": "DO", "objectPath": "' + $domainObjectPath + '" }'
 
 try {
@@ -214,6 +206,7 @@ catch {
 }
 
 # (3) Set log level of all processes and sub processes of secified domain object path:
+#
 try {
     # Recursively set log level of processes related to domain object path:
     if ($list) {
