@@ -65,10 +65,10 @@
 param (
     [Parameter(Mandatory=$true)][string]$instance,
     [Parameter(Mandatory=$true)][string]$username = "admin",
-	[Parameter(Mandatory=$true)][string]$password = "admin",
-	[Parameter(Mandatory=$true)][string][Alias("path")]$domainObjectPath,
-	[string][Alias("filter")]$domainObjectFilter = ".*",
-	[Parameter(Mandatory=$true)][string][ValidateSet("INFO", "SUCCESS", "WARNING", "ERROR")][Alias("logLevel")]$domainObjectLogLevel, # INFO | SUCCESS | WARNING | ERROR
+    [Parameter(Mandatory=$true)][string]$password = "admin",
+    [Parameter(Mandatory=$true)][string][Alias("path")]$domainObjectPath,
+    [string][Alias("filter")]$domainObjectFilter = ".*",
+    [Parameter(Mandatory=$true)][string][ValidateSet("INFO", "SUCCESS", "WARNING", "ERROR")][Alias("logLevel")]$domainObjectLogLevel, # INFO | SUCCESS | WARNING | ERROR
     [switch]$list
 )
 
@@ -182,10 +182,10 @@ try {
 	}
 }
 catch {
-	write-host "Unable to login into nJAMS instance due to:" -ForegroundColor Red
+    write-host "Unable to login into nJAMS instance due to:" -ForegroundColor Red
     write-host "$_.Exception.Message"
 
-	Exit
+    Exit
 }
 
 # (2) Get domain object id of given domain object path:
