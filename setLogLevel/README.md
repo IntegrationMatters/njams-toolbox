@@ -15,7 +15,7 @@ The script can be executed on any Windows, Linux, or Mac machine within the same
 * allows RegEx in filter criterion to limit domain object selection of domain object path
 * parameter "list" allows to only list domain objects without changing the log level.
 * supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
-* script runs on Windows, Linux, and macOS using Powershell Core 7 or Windows Powershell 5
+* script runs on Windows, Linux, and macOS using PowerShell Core 7 or Windows PowerShell 5
 * output can be formatted individually by common PowerShell `format` cmdlet
 
 ## Usage:
@@ -45,7 +45,7 @@ Run `./setLogLevel.ps1 -?` to learn more about how to use the script.
 
 * Windows:
 
-  Run Powershell and enter command, for example:
+  Run PowerShell and enter command, for example:
 
   ```
   PS C:\> .\setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"
@@ -63,15 +63,15 @@ Run `./setLogLevel.ps1 -?` to learn more about how to use the script.
 
 * Linux/Unix: 
 
-  This script requires *PowerShell 7* or higher. Please follow these instructions to install Powershell 7 on Linux/Unix:
+  This script requires *PowerShell 7* or higher. Please follow these instructions to install PowerShell 7 on Linux/Unix:
   https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-7
 
 * Windows:
 
-  This script requires *Windows PowerShell 5*, respectively *PowerShell 7* or higher. Please follow these instructions to install Powershell 7 on Linux/Unix:
+  This script requires *Windows PowerShell 5*, respectively *PowerShell 7* or higher. Please follow these instructions to install PowerShell 7 on Linux/Unix:
   https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows?view=powershell-7
 
 * macOS:
 
-  This script requires *PowerShell 7* or higher. Please follow these instructions to install Powershell 7 on macOS:
+  This script requires *PowerShell 7* or higher. Please follow these instructions to install PowerShell 7 on macOS:
   https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-macos?view=powershell-7

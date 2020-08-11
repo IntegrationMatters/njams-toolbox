@@ -11,8 +11,8 @@
     - allows RegEx in filter criterion to limit domain object selection of domain object path
     - parameter "list" allows to only list domain objects without changing the log level.
     - supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
-    - script runs on Windows, Linux, and macOS using Powershell Core 7 or Windows Powershell 5
-    - output can be formatted individually by common Powershell format commands
+    - script runs on Windows, Linux, and macOS using PowerShell Core 7 or Windows PowerShell 5
+    - output can be formatted individually by common PowerShell format commands
 
     Please note:
     Make sure the corresponding nJAMS Client for the domain object path is running and able to receive commands to change the log level.
@@ -74,7 +74,7 @@ param (
 
 # Change policy to trust all certificates, just in case you are using TLS/HTTPS:
 # Use -SkipCertificateCheck in "Invoke-RestMethod" instead, when you are on PScore.
-# For Windows Powershell 5 use the following:
+# For Windows PowerShell 5 use the following:
 if ($PSVersionTable.PSEdition -ne "Core") {
 Add-Type @"
 using System.Net;

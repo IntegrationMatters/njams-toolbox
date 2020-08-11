@@ -6,14 +6,14 @@
     You can enter various filter criteria such as settings for retention or loglevel, as well as properties like nJAMS Client version number. Especially in large nJAMS instances with thousands of domain objects 'findDomainObjects' helps you to detect misconfigurations of domain objects and outdated versions of nJAMS Clients.
     If you omit any filter criteria, the script provides a list of all domain objects.
     The script outputs a list of domains objects that can be formatted by common ps format commands.
-    The script can be executed on any Windows, Linux, or Mac machine within the same network of the machine, where nJAMS Server is running.
+    The script can be executed on any Linux/Unix, Windows, or Mac machine within the same network of the machine, where nJAMS Server is running.
 
     Characteristics:
     - find domain objects of an nJAMS instance
 	- filter list of domain objects by common settings such as 'retention', 'stripOnSuccess', or by process and client properties like 'logLevel', 'exclude', 'logMode', 'version' of nJAMS Clients, etc.
 	- allows RegEx in filter criteria for more precise hits
 	- supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
-	- script runs on Linux and macOS using Powershell 7 or on Windows using Windows PowerShell 5 or PoweShell 7
+	- script runs on Linux and macOS using PowerShell 7 or on Windows using Windows PowerShell 5 or PoweShell 7
     - output can be formatted individually by common PowerShell format commands
 
 .PARAMETER instance
@@ -152,7 +152,7 @@ if ($PSBoundParameters.ContainsKey('name') -eq $false -and
 
 # Change policy to trust all certificates, just in case you are using TLS/HTTPS:
 # Use -SkipCertificateCheck in "Invoke-RestMethod" instead, when you are on PScore.
-# For Windows Powershell 5 use the following:
+# For Windows PowerShell 5 use the following:
 if ($PSVersionTable.PSEdition -ne "Core") {
 Add-Type @"
 using System.Net;
