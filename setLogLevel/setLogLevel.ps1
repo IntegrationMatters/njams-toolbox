@@ -2,20 +2,20 @@
 .SYNOPSIS
     Set log level for domain objects of a given domain object path.
 .DESCRIPTION
-	This script changes the log level of domain objects related to a specified domain object path including its sub elements.
-	The log level can be set to INFO, SUCCESS, WARNING, or ERROR.
-	The script requires to enter the URL of an nJAMS Server instance, including username and password, the domain object path that contains the domain objects that should be applied with new log level, and the new log level. 
-	The script can be executed on any Windows, Linux, or Mac machine within the same network of the machine, where nJAMS Server is running.
-	Characteristics:
-	- allows to change log level for a bunch of domain objects
-	- allows RegEx in filter criterion to limit domain object selection of domain object path
-	- parameter "list" allows to only list domain objects without changing the log level.
-	- supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
-	- script runs on Windows, Linux, and macOS using Powershell Core 7 or Windows Powershell 5
-	- output can be formatted individually by common Powershell format commands
-	
-	Please note:
-	Make sure the corresponding nJAMS Client for the domain object path is running and able to receive commands to change the log level.
+    This script changes the log level of domain objects related to a specified domain object path including its sub elements.
+    The log level can be set to INFO, SUCCESS, WARNING, or ERROR.
+    The script requires to enter the URL of an nJAMS Server instance, including username and password, the domain object path that contains the domain objects that should be applied with new log level, and the new log level. 
+    The script can be executed on any Windows, Linux, or Mac machine within the same network of the machine, where nJAMS Server is running.
+    Characteristics:
+    - allows to change log level for a bunch of domain objects
+    - allows RegEx in filter criterion to limit domain object selection of domain object path
+    - parameter "list" allows to only list domain objects without changing the log level.
+    - supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
+    - script runs on Windows, Linux, and macOS using Powershell Core 7 or Windows Powershell 5
+    - output can be formatted individually by common Powershell format commands
+
+    Please note:
+    Make sure the corresponding nJAMS Client for the domain object path is running and able to receive commands to change the log level.
 
 .PARAMETER instance
     Enter the nJAMS instance URL, e.g. "http://localhost:8080/njams". This parameter is mandatory.
@@ -51,6 +51,7 @@
     Lists matching domain objects, while checking communication to nJAMS Client(s). Log level settings remain unchanged. 
 	
 .LINK
+    https://github.com/integrationmatters/njams-toolbox
     https://www.integrationmatters.com/
 
 .NOTES
@@ -58,6 +59,7 @@
     Copyright:  (c) Integration Matters
     Author:     Stephan Holters
     Date:       August 2020
+
 #>
 
 param (

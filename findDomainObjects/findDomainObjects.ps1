@@ -60,7 +60,7 @@
 .EXAMPLE
     ./findDomainObjects.ps1 -instance "http://localhost:8080/njams" -username "admin" -password "admin"
     Finds all domain objects of an instance by using specified credentials.
-    You can automatically format the list for tabular output using format command:
+    You can automatically format the list for tabular output using format cmdlet:
     ./findDomainObjects.ps1 -instance "http://localhost:8080/njams" -username "admin" -password "admin" | format-table
 
 .EXAMPLE
@@ -78,6 +78,7 @@
     You can use wildcards '*', '?' to match domain object names.
 
 .LINK
+    https://github.com/integrationmatters/njams-toolbox
     https://www.integrationmatters.com/
 
 .NOTES
