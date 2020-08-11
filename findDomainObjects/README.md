@@ -47,7 +47,7 @@ Run `./findDomainObjects.ps1 -?` to learn more about how to use the script.
   Run a shell and enter command, for example:
 
   ```
-  $ pwsh -c './findDomainObjects.ps1 -instance "http://localhost:8080/njams" -username "admin" -password "admin" -logLevel "ERROR" | format-table'
+  $ pwsh -c './findDomainObjects.ps1 -instance "http://localhost:8080/njams" -logLevel "ERROR" | format-table'
   ```
 
 * Windows:
@@ -55,7 +55,7 @@ Run `./findDomainObjects.ps1 -?` to learn more about how to use the script.
   Run PowerShell and enter command, for example:
 
   ```
-  PS C:\> .\findDomainObjects.ps1 -instance "http://localhost:8080/njams" -username "admin" -password "admin" -logLevel "ERROR" | format-table"
+  PS C:\> .\findDomainObjects.ps1 -instance "http://localhost:8080/njams" -logLevel "ERROR" | format-table"
   ```
 
 * macOS:
@@ -63,7 +63,7 @@ Run `./findDomainObjects.ps1 -?` to learn more about how to use the script.
   Run a shell and enter command, for example:
 
   ```
-  $ pwsh -c './findDomainObjects.ps1 -instance "http://localhost:8080/njams" -username "admin" -password "admin" -logLevel "ERROR" | format-table'
+  $ pwsh -c './findDomainObjects.ps1 -instance "http://localhost:8080/njams" -logLevel "ERROR" | format-table'
   ```
 
 ## Prerequisites:
