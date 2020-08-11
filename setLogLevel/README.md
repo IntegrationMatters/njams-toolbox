@@ -21,7 +21,12 @@ The script can be executed on any Windows, Linux, or Mac machine within the same
 
 ```
 SYNTAX
-    ./setLogLevel.ps1 [-instance] <String> [-username] <String> [-password] <String> [-domainObjectPath] <String> [[-filterProcess] <String>] [-domainObjectLogLevel] <String> [-list] [<CommonParameters>]
+    ./setLogLevel.ps1 [-instance] <String> 
+                      [-username] <String> [-password] <String> 
+                      [-domainObjectPath] <String> 
+                      [[-filterProcess] <String>] 
+                      [-domainObjectLogLevel] <String> 
+                      [-list] [<CommonParameters>]
 ```
 
 Run `./setLogLevel.ps1 -?` to learn more about how to use the script. 
