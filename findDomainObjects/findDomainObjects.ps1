@@ -6,13 +6,15 @@
     You can enter various filter criteria such as settings for retention or loglevel, as well as properties like nJAMS Client version number. Especially in large nJAMS instances with thousands of domain objects 'findDomainObjects' helps you to detect misconfigurations of domain objects and outdated versions of nJAMS Clients.
     If you omit any filter criteria, the script provides a list of all domain objects.
     The script outputs a list of domains objects that can be formatted by common ps format commands.
+    The script can be executed on any Windows, Linux, or Mac machine within the same network of the machine, where nJAMS Server is running.
+
     Characteristics:
     - find domain objects of an nJAMS instance
 	- filter list of domain objects by common settings such as 'retention', 'stripOnSuccess', or by process and client properties like 'logLevel', 'exclude', 'logMode', 'version' of nJAMS Clients, etc.
 	- allows RegEx in filter criteria for more precise hits
 	- supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
-	- script runs on Windows, Linux, and macOS using Powershell Core 7 or Windows Powershell 5
-    - output can be formatted individually by common Powershell format commands
+	- script runs on Linux and macOS using Powershell 7 or on Windows using Windows PowerShell 5 or PoweShell 7
+    - output can be formatted individually by common PowerShell format commands
 
 .PARAMETER instance
     Enter the nJAMS instance URL, e.g. "http://localhost:8080/njams". This parameter is mandatory.
@@ -24,7 +26,7 @@
     Enter password of the nJAMS instance account. Default is "admin".
 
 .PARAMETER name
-    Find domain objects of a particular name. Use standard wildcards. Default is any value.
+    Find domain objects of a particular name. Use RegEx to limit selection. Default is any value.
 
 .PARAMETER parentId
     Find domain objects of a parent domain object id. Enter positive integer value. Default is root Id (0).
@@ -51,7 +53,7 @@
     Find domain objects of a particular SDK version of an nJAMS Client. Use RegEx to limit SDK version, e.g. "4.*" finds any SDK version of "4". Default is any value.
 
 .PARAMETER machineName
-    Find domain objects of a particular machine. Use standard wildcards. Default is any value.
+    Find domain objects of a particular machine. Use RegEx to limit selection. Default is any value.
 
 .PARAMETER logMode
     Find domain objects, where setting logMode' is "COMPLETE", EXCLUSIVE", or "NONE". Default is any value.
@@ -73,9 +75,9 @@
     Use regular expression to match version numbers, e.g. "4.[1-2].*".
 
 .EXAMPLE
-    ./findDomainObjects.ps1 -instance "http://localhost:8080/njams" -name "*C1*"
+    ./findDomainObjects.ps1 -instance "http://localhost:8080/njams" -name ".*C1.*"
     Finds all domain objects, where name contains "C1".
-    You can use wildcards '*', '?' to match domain object names.
+    You can use regular expression to limit selection.
 
 .LINK
     https://github.com/integrationmatters/njams-toolbox
@@ -89,9 +91,9 @@
 #>
 
 param (
-    [string]$instance = "http://localhost:8080/njams",
-    [string]$username = "admin",
-    [string]$password = "admin",
+    [Parameter(Mandatory=$true)][string]$instance = "http://localhost:8080/njams",
+    [Parameter(Mandatory=$true)][string]$username = "admin",
+    [Parameter(Mandatory=$true)][string]$password = "admin",
     # filter criteria for do type "Client":
     [string][Alias("version")]$versionNumber = ".*",
     [string][Alias("sdk")]$sdkVersion = ".*",
@@ -203,7 +205,7 @@ function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
                     }
                     if ([string]$processDomainObject.logLevel -like $logLevel -and
                         [string]$processDomainObject.exclude -like $exclude -and 
-                        [string]$processDomainObject.name -like $name -and 
+                        [string]$processDomainObject.name -match $name -and 
                         [string]$processDomainObject.category -like $category -and 
                         [string]$processDomainObject.stripOnSuccess -like $stripOnSuccess -and 
                         [string]$processDomainObject.retention -match $retention) {
@@ -241,9 +243,9 @@ function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
                     }
                     if ([string]$clientDomainObject.versionNumber -match $versionNumber -and 
                         [string]$clientDomainObject.sdkVersion -match $sdkVersion -and 
-                        [string]$clientDomainObject.machineName -like $machineName -and 
+                        [string]$clientDomainObject.machineName -match $machineName -and 
                         [string]$clientDomainObject.logMode -like $logMode -and 
-                        [string]$clientDomainObject.name -like $name -and
+                        [string]$clientDomainObject.name -match $name -and
                         [string]$clientDomainObject.category -like $category -and
                         [string]$clientDomainObject.stripOnSuccess -like $stripOnSuccess -and 
                         [string]$clientDomainObject.retention -match $retention) {
@@ -276,7 +278,7 @@ function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
                     else {
                         $anyDomainObject = Invoke-RestMethod -Method GET -Header $myHeader -ContentType "application/json" -uri "$instance/api/domainobject/extended/$($do.Id)" -WebSession $mySession
                     }
-                    if([string]$anyDomainObject.name -like $name -and
+                    if([string]$anyDomainObject.name -match $name -and
                         [string]$anyDomainObject.category -like $category -and 
                         [string]$anyDomainObject.stripOnSuccess -like $stripOnSuccess -and 
                         [string]$anyDomainObject.retention -match $retention) {

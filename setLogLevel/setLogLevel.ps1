@@ -33,7 +33,7 @@
     Specifies the 'logLevel' for a domain object. Must contain one of these values: "INFO", "SUCCESS", "WARNING", or "ERROR". This parameter is mandatory.
 
 .PARAMETER domainObjectFilter
-    Filters domain objects by name of the specified domain object path. Use RegEx for filter criterion to limit process selection. This parameter is optional.
+    Filters domain objects by name of the specified domain object path. Use RegEx to limit selection. This parameter is optional.
     
 .PARAMETER list
     When this parameter is specified, the script virtually simulates setting the log level. The log level will NOT be applied, but only a list of matching domain objects will be returned. This is useful for checking the filter criterion. This option also checks corresponding nJAMS Client(s) for availabilty. This parameter is optional.
