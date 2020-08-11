@@ -6,13 +6,15 @@
     You can enter various filter criteria such as settings for retention or loglevel, as well as properties like nJAMS Client version number. Especially in large nJAMS instances with thousands of domain objects 'findDomainObjects' helps you to detect misconfigurations of domain objects and outdated versions of nJAMS Clients.
     If you omit any filter criteria, the script provides a list of all domain objects.
     The script outputs a list of domains objects that can be formatted by common ps format commands.
+    The script can be executed on any Linux/Unix, Windows, or Mac machine within the same network of the machine, where nJAMS Server is running.
+
     Characteristics:
     - find domain objects of an nJAMS instance
-	- filter list of domain objects by common settings such as 'retention', 'stripOnSuccess', or by process and client properties like 'logLevel', 'exclude', 'logMode', 'version' of nJAMS Clients, etc.
-	- allows RegEx in filter criteria for more precise hits
-	- supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
-	- script runs on Windows, Linux, and macOS using Powershell Core 7 or Windows Powershell 5
-    - output can be formatted individually by common Powershell format commands
+    - filter list of domain objects by common settings such as 'retention', 'stripOnSuccess', or by process and client properties like 'logLevel', 'exclude', 'logMode', 'version' of nJAMS Clients, etc.
+    - allows RegEx in filter criteria for more precise hits
+    - supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
+    - script runs on Linux and macOS using PowerShell 7 or on Windows using Windows PowerShell 5 or PoweShell 7
+    - output can be formatted individually by common PowerShell format commands
 
 .PARAMETER instance
     Enter the nJAMS instance URL, e.g. "http://localhost:8080/njams". This parameter is mandatory.
@@ -24,13 +26,13 @@
     Enter password of the nJAMS instance account. Default is "admin".
 
 .PARAMETER name
-    Find domain objects of a particular name. Use standard wildcards. Default is any value.
+    Find domain objects of a particular name. Use RegEx to limit selection. Default is any value.
 
 .PARAMETER parentId
     Find domain objects of a parent domain object id. Enter positive integer value. Default is root Id (0).
 
 .PARAMETER category
-    Find domain objects of monitored integration platform, e.g. "BW, "BW6", "MULE4EE", etc. Default is any value.
+    Find domain objects of monitored integration platform, e.g. "BW, "BW6", "MULE4EE", etc. Use RegEx to limit category. Default is any value.
     
 .PARAMETER stripOnSuccess
     Find domain objects, where setting 'stripOnSucces' is "true" or "false". Default is any value.
@@ -45,13 +47,13 @@
     Find domain objects, where setting 'exclude' is is "true" or "false". Default is any value.
     
 .PARAMETER versionNumber
-    Find domain objects of a particular nJAMS Client version. User RegEx to limit version, e.g. "4.[0-1].*" finds any version of "4.0" and "4.1". Default is any value.
+    Find domain objects of a particular nJAMS Client version. Use RegEx to limit version, e.g. "4.[0-1].*" finds any version of "4.0" and "4.1". Default is any value.
     
 .PARAMETER sdkVersion
     Find domain objects of a particular SDK version of an nJAMS Client. Use RegEx to limit SDK version, e.g. "4.*" finds any SDK version of "4". Default is any value.
 
 .PARAMETER machineName
-    Find domain objects of a particular machine. Use standard wildcards. Default is any value.
+    Find domain objects of a particular machine. Use RegEx to limit selection. Default is any value.
 
 .PARAMETER logMode
     Find domain objects, where setting logMode' is "COMPLETE", EXCLUSIVE", or "NONE". Default is any value.
@@ -60,7 +62,8 @@
 .EXAMPLE
     ./findDomainObjects.ps1 -instance "http://localhost:8080/njams" -username "admin" -password "admin"
     Finds all domain objects of an instance by using specified credentials.
-    You can automatically format the list for tabular output using format command:
+    
+    You can automatically format the list for tabular output using format cmdlet:
     ./findDomainObjects.ps1 -instance "http://localhost:8080/njams" -username "admin" -password "admin" | format-table
 
 .EXAMPLE
@@ -73,11 +76,12 @@
     Use regular expression to match version numbers, e.g. "4.[1-2].*".
 
 .EXAMPLE
-    ./findDomainObjects.ps1 -instance "http://localhost:8080/njams" -name "*C1*"
+    ./findDomainObjects.ps1 -instance "http://localhost:8080/njams" -name ".*C1.*"
     Finds all domain objects, where name contains "C1".
-    You can use wildcards '*', '?' to match domain object names.
+    You can use regular expression to limit selection.
 
 .LINK
+    https://github.com/integrationmatters/njams-toolbox
     https://www.integrationmatters.com/
 
 .NOTES
@@ -88,20 +92,20 @@
 #>
 
 param (
-    [string]$instance = "http://localhost:8080/njams",
+    [Parameter(Mandatory=$true)][string]$instance = "http://localhost:8080/njams",
     [string]$username = "admin",
     [string]$password = "admin",
     # filter criteria for do type "Client":
     [string][Alias("version")]$versionNumber = ".*",
     [string][Alias("sdk")]$sdkVersion = ".*",
     [string][ValidateSet("COMPLETE", "EXCLUSIVE", "NONE")]$logMode = "*",
-    [string][Alias("machine")]$machineName = "*",
+    [string][Alias("machine")]$machineName = ".*",
     # filter criteria for domain object type "Process":
     [string][ValidateSet("INFO", "SUCCESS", "WARNING", "ERROR")]$logLevel = "*",
     [string][ValidateSet("True", "False")]$exclude = "*",
     # filter criteria for any domain object type:
-    [string]$name = "*",
-    [string]$category = "*",
+    [string]$name = ".*",
+    [string]$category = ".*",
     [string][ValidateSet("True", "False")][Alias("strip")]$stripOnSuccess = "*",
     [string]$retention = ".*",
     [int]$parentId = 0
@@ -149,7 +153,7 @@ if ($PSBoundParameters.ContainsKey('name') -eq $false -and
 
 # Change policy to trust all certificates, just in case you are using TLS/HTTPS:
 # Use -SkipCertificateCheck in "Invoke-RestMethod" instead, when you are on PScore.
-# For Windows Powershell 5 use the following:
+# For Windows PowerShell 5 use the following:
 if ($PSVersionTable.PSEdition -ne "Core") {
 Add-Type @"
 using System.Net;
@@ -168,10 +172,10 @@ $allProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
 [System.Net.ServicePointManager]::SecurityProtocol = $allProtocols
 }
 
-# Loop each elements and compare log level:
+# Recursively loop each element:
 function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
 
-        # If id is 0, just send object type, otherwise send id and object type:
+    # If id is 0, just send object type, otherwise send id and object type:
     if($doId -eq "0") {
         $myRequestBody = '{ "objectType": "' + $doType + '" }'
     }
@@ -202,8 +206,8 @@ function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
                     }
                     if ([string]$processDomainObject.logLevel -like $logLevel -and
                         [string]$processDomainObject.exclude -like $exclude -and 
-                        [string]$processDomainObject.name -like $name -and 
-                        [string]$processDomainObject.category -like $category -and 
+                        [string]$processDomainObject.name -match $name -and 
+                        [string]$processDomainObject.category -match $category -and 
                         [string]$processDomainObject.stripOnSuccess -like $stripOnSuccess -and 
                         [string]$processDomainObject.retention -match $retention) {
                             # Write-Output "Category: $($processDomainObject.category), LogLevel: $($processDomainObject.logLevel), Exclude: $($processDomainObject.exclude), StripOnSuccess: $($processDomainObject.stripOnSuccess), Retention: $($processDomainObject.retention), DO: $($do.id) $($do.path)"
@@ -240,10 +244,10 @@ function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
                     }
                     if ([string]$clientDomainObject.versionNumber -match $versionNumber -and 
                         [string]$clientDomainObject.sdkVersion -match $sdkVersion -and 
-                        [string]$clientDomainObject.machineName -like $machineName -and 
+                        [string]$clientDomainObject.machineName -match $machineName -and 
                         [string]$clientDomainObject.logMode -like $logMode -and 
-                        [string]$clientDomainObject.name -like $name -and
-                        [string]$clientDomainObject.category -like $category -and
+                        [string]$clientDomainObject.name -match $name -and
+                        [string]$clientDomainObject.category -match $category -and
                         [string]$clientDomainObject.stripOnSuccess -like $stripOnSuccess -and 
                         [string]$clientDomainObject.retention -match $retention) {
                             # Write-Output "Category: $($clientDomainObject.category), Version: $($clientDomainObject.versionNumber), SDK: $($clientDomainObject.sdkVersion), logMode: $($clientDomainObject.logMode), Machine: $($clientDomainObject.machineName), StripOnSuccess: $($clientDomainObject.stripOnSuccess), Retention: $($clientDomainObject.retention), DO: $($clientDomainObject.id) $($clientDomainObject.objectPath)"
@@ -275,8 +279,8 @@ function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
                     else {
                         $anyDomainObject = Invoke-RestMethod -Method GET -Header $myHeader -ContentType "application/json" -uri "$instance/api/domainobject/extended/$($do.Id)" -WebSession $mySession
                     }
-                    if([string]$anyDomainObject.name -like $name -and
-                        [string]$anyDomainObject.category -like $category -and 
+                    if([string]$anyDomainObject.name -match $name -and
+                        [string]$anyDomainObject.category -match $category -and 
                         [string]$anyDomainObject.stripOnSuccess -like $stripOnSuccess -and 
                         [string]$anyDomainObject.retention -match $retention) {
                             # Write-Output "Category: $($anyDomainObject.category), StripOnSuccess: $($anyDomainObject.stripOnSuccess), Retention: $($anyDomainObject.retention), DO: $($anyDomainObject.id) $($anyDomainObject.objectPath)"
@@ -335,7 +339,7 @@ try {
     # Browse domain objects:
     fnBrowseDomainObjects "$startDoId" "$startDoType"
 
-    write-host "Finished." 
+    write-output "Finished." 
 }
 catch {
     write-host "Unable to retrieve domain objects from nJAMS instance due to:" -ForegroundColor Red
