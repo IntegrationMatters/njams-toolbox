@@ -9,7 +9,7 @@
 	Characteristics:
 	- allows to change log level for a bunch of domain objects
 	- allows RegEx in filter criterion to limit domain object selection of domain object path
-	- parameter "list" allows to only list selected domain objects for which the log level should be changed without changing the log level.
+	- parameter "list" allows to only list domain objects without changing the log level.
 	- supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
 	- script runs on Windows, Linux, and macOS using Powershell Core 7 or Windows Powershell 5
 	- output can be formatted individually by common Powershell format commands
