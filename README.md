@@ -3,7 +3,7 @@ This repository contains tools that can help you with the daily use of nJAMS. Le
 
 * **findDomainObjects.ps1**
 
-  Find domain objects of given nJAMS instance. Assume you have a big nJAMS instance containing hundreds of domain objects and you want to find the domain objects that match a specific configuration. For example, you may want to find domain objects with an incorrect retention setting, or domain objects that have accidentally turned on StripOnSuccess. This script will easily find these domain objects.
+  Find domain objects of given nJAMS instance. Assume you have a big nJAMS instance containing hundreds of domain objects and you want to find the domain objects that match a specific configuration. For example, you may want to find domain objects with an incorrect 'retention' setting, or domain objects that have accidentally turned on 'StripOnSuccess'. This script will easily find these domain objects.
 
 * **setLogLevel.ps1**
 
