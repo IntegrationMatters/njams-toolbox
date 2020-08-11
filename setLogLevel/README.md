@@ -40,7 +40,7 @@ Run `./setLogLevel.ps1 -?` to learn more about how to use the script.
   Run a shell and enter command, for example:
 
   ```
-  $ pwsh -c './setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"'
+  $ pwsh -c './setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">prod>finance>invoicing>" -loglevel "ERROR"'
   ```
 
 * Windows:
@@ -48,7 +48,7 @@ Run `./setLogLevel.ps1 -?` to learn more about how to use the script.
   Run PowerShell and enter command, for example:
 
   ```
-  PS C:\> .\setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"
+  PS C:\> .\setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">prod>finance>invoicing>" -loglevel "ERROR"
   ```
 
 * macOS:
@@ -56,7 +56,7 @@ Run `./setLogLevel.ps1 -?` to learn more about how to use the script.
   Run a shell and enter command, for example:
 
   ```
-  $ pwsh -c './setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"'
+  $ pwsh -c './setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">prod>finance>invoicing>" -loglevel "ERROR"'
   ```
 
 ## Prerequisites:

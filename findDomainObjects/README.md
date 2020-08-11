@@ -23,7 +23,7 @@ The script can be executed on any Linux/Unix, Windows, or Mac machine within the
 ```
 SYNTAX
     ./findDomainObjects.ps1 [-instance] <String>
-                            [[-username] <String>] [[-password] <String>]
+                            [-username] <String> [-password] <String>
                             [[-versionNumber] <String>] 
                             [[-sdkVersion] <String>] 
                             [[-logMode] <String>] 
