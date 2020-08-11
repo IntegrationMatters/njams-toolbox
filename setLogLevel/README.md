@@ -22,19 +22,19 @@ Set log level for domain objects with regards to a given domain object path of a
 
   Run a shell and enter for example:
 
-  $ pwsh -c './setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"'
+    $ pwsh -c './setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"'
 
 * Windows:
 
   Run Powershell and enter for example:
 
-  PS C:\> .\setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"
+    PS C:\> .\setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"
 
 * macOS:
 
   Run a shell and enter for example:
 
-  $ pwsh -c './setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"'
+    $ pwsh -c './setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"'
 
 ## Prerequisites:
 
@@ -45,7 +45,7 @@ Set log level for domain objects with regards to a given domain object path of a
 
 * Windows:
 
-  This script requires either *Windows PowerShell 5* or *PowerShell 7* or higher. Please follow these instructions to install Powershell 7 on Linux/Unix:
+  This script requires either *Windows PowerShell 5*, respectively *PowerShell 7* or higher. Please follow these instructions to install Powershell 7 on Linux/Unix:
   https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows?view=powershell-7
 
 * macOS:
