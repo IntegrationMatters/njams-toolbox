@@ -39,12 +39,12 @@
     When this parameter is specified, the script virtually simulates setting the log level. The log level will NOT be applied, but only a list of matching domain objects will be returned. This is useful for checking the filter criterion. This option also checks corresponding nJAMS Client(s) for availabilty. This parameter is optional.
 
 .EXAMPLE
-    ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">prod>finance>invoicing>" -loglevel "ERROR"
+    ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"
     Sets log level to "ERROR" for all domain objects of domain object path ">prod>finance>invoicing>"and its sub elements.
     
 .EXAMPLE
     ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">prod>finance>invoicing>" -filter "Order.*" -loglevel "ERROR"
-    Sets log level to "ERROR" for domain objects whose names begin with "Order" of domain object path ">prod>finance>invoicing>".
+    Sets log level to "ERROR" for domain objects whose names begin with "Order" of domain object path ">prod>finance>invoicing>" while using default credentials (admin/admin).
 
 .EXAMPLE
     ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">test>" -loglevel "ERROR" -filter ".*TargetSAP.*" -list

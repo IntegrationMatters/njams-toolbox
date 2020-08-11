@@ -7,4 +7,4 @@ This repository contains tools that can help you with the daily use of nJAMS. Le
 
 * **setLogLevel.ps1**
 
-  Set log level for domain objects with regards to a given domain object path of an nJAMS instance. Assume you want to change the log level for several domain objects and you do not want to change each domain object one by one in nJAMS UI. This script will help you to change the log level for domain objects of a specific path and and its sub elements.
+  Set log level for domain objects with regards to a given domain object path of an nJAMS instance. Assume you want to change the log level for several domain objects and you do not want to change each domain object one by one in nJAMS UI. This script will help you to change the log level for domain objects of a specific path and its sub elements.
