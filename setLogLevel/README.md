@@ -22,7 +22,11 @@ Set log level for domain objects with regards to a given domain object path of a
 
   Run a shell and enter for example:
 
-    $ pwsh -c './setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"'
+  ```
+  
+  $ pwsh -c './setLogLevel.ps1 -instance "http://localhost:8080/njams" -user "admin" -password "admin" -path ">prod>finance>invoicing>" -loglevel "ERROR"'
+  
+  ```
 
 * Windows:
 
