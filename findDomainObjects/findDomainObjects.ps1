@@ -32,7 +32,7 @@
     Find domain objects of a parent domain object id. Enter positive integer value. Default is root Id (0).
 
 .PARAMETER category
-    Find domain objects of monitored integration platform, e.g. "BW, "BW6", "MULE4EE", etc. Default is any value.
+    Find domain objects of monitored integration platform, e.g. "BW, "BW6", "MULE4EE", etc. Use RegEx to limit category. Default is any value.
     
 .PARAMETER stripOnSuccess
     Find domain objects, where setting 'stripOnSucces' is "true" or "false". Default is any value.
@@ -47,7 +47,7 @@
     Find domain objects, where setting 'exclude' is is "true" or "false". Default is any value.
     
 .PARAMETER versionNumber
-    Find domain objects of a particular nJAMS Client version. User RegEx to limit version, e.g. "4.[0-1].*" finds any version of "4.0" and "4.1". Default is any value.
+    Find domain objects of a particular nJAMS Client version. Use RegEx to limit version, e.g. "4.[0-1].*" finds any version of "4.0" and "4.1". Default is any value.
     
 .PARAMETER sdkVersion
     Find domain objects of a particular SDK version of an nJAMS Client. Use RegEx to limit SDK version, e.g. "4.*" finds any SDK version of "4". Default is any value.
@@ -92,19 +92,19 @@
 
 param (
     [Parameter(Mandatory=$true)][string]$instance = "http://localhost:8080/njams",
-    [Parameter(Mandatory=$true)][string]$username = "admin",
-    [Parameter(Mandatory=$true)][string]$password = "admin",
+    [string]$username = "admin",
+    [string]$password = "admin",
     # filter criteria for do type "Client":
     [string][Alias("version")]$versionNumber = ".*",
     [string][Alias("sdk")]$sdkVersion = ".*",
     [string][ValidateSet("COMPLETE", "EXCLUSIVE", "NONE")]$logMode = "*",
-    [string][Alias("machine")]$machineName = "*",
+    [string][Alias("machine")]$machineName = ".*",
     # filter criteria for domain object type "Process":
     [string][ValidateSet("INFO", "SUCCESS", "WARNING", "ERROR")]$logLevel = "*",
     [string][ValidateSet("True", "False")]$exclude = "*",
     # filter criteria for any domain object type:
-    [string]$name = "*",
-    [string]$category = "*",
+    [string]$name = ".*",
+    [string]$category = ".*",
     [string][ValidateSet("True", "False")][Alias("strip")]$stripOnSuccess = "*",
     [string]$retention = ".*",
     [int]$parentId = 0
@@ -206,7 +206,7 @@ function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
                     if ([string]$processDomainObject.logLevel -like $logLevel -and
                         [string]$processDomainObject.exclude -like $exclude -and 
                         [string]$processDomainObject.name -match $name -and 
-                        [string]$processDomainObject.category -like $category -and 
+                        [string]$processDomainObject.category -match $category -and 
                         [string]$processDomainObject.stripOnSuccess -like $stripOnSuccess -and 
                         [string]$processDomainObject.retention -match $retention) {
                             # Write-Output "Category: $($processDomainObject.category), LogLevel: $($processDomainObject.logLevel), Exclude: $($processDomainObject.exclude), StripOnSuccess: $($processDomainObject.stripOnSuccess), Retention: $($processDomainObject.retention), DO: $($do.id) $($do.path)"
@@ -246,7 +246,7 @@ function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
                         [string]$clientDomainObject.machineName -match $machineName -and 
                         [string]$clientDomainObject.logMode -like $logMode -and 
                         [string]$clientDomainObject.name -match $name -and
-                        [string]$clientDomainObject.category -like $category -and
+                        [string]$clientDomainObject.category -match $category -and
                         [string]$clientDomainObject.stripOnSuccess -like $stripOnSuccess -and 
                         [string]$clientDomainObject.retention -match $retention) {
                             # Write-Output "Category: $($clientDomainObject.category), Version: $($clientDomainObject.versionNumber), SDK: $($clientDomainObject.sdkVersion), logMode: $($clientDomainObject.logMode), Machine: $($clientDomainObject.machineName), StripOnSuccess: $($clientDomainObject.stripOnSuccess), Retention: $($clientDomainObject.retention), DO: $($clientDomainObject.id) $($clientDomainObject.objectPath)"
@@ -279,7 +279,7 @@ function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
                         $anyDomainObject = Invoke-RestMethod -Method GET -Header $myHeader -ContentType "application/json" -uri "$instance/api/domainobject/extended/$($do.Id)" -WebSession $mySession
                     }
                     if([string]$anyDomainObject.name -match $name -and
-                        [string]$anyDomainObject.category -like $category -and 
+                        [string]$anyDomainObject.category -match $category -and 
                         [string]$anyDomainObject.stripOnSuccess -like $stripOnSuccess -and 
                         [string]$anyDomainObject.retention -match $retention) {
                             # Write-Output "Category: $($anyDomainObject.category), StripOnSuccess: $($anyDomainObject.stripOnSuccess), Retention: $($anyDomainObject.retention), DO: $($anyDomainObject.id) $($anyDomainObject.objectPath)"

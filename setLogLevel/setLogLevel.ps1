@@ -33,7 +33,7 @@
     Specifies the 'logLevel' for a domain object. Must contain one of these values: "INFO", "SUCCESS", "WARNING", or "ERROR". This parameter is mandatory.
 
 .PARAMETER domainObjectFilter
-    Filters domain objects by name of the specified domain object path. Use RegEx to limit selection. This parameter is optional.
+    Filters domain objects by name of the specified domain object path. Use RegEx to limit process selection. This parameter is optional.
     
 .PARAMETER list
     When this parameter is specified, the script virtually simulates setting the log level. The log level will NOT be applied, but only a list of matching domain objects will be returned. This is useful for checking the filter criterion. This option also checks corresponding nJAMS Client(s) for availabilty. This parameter is optional.
@@ -64,13 +64,13 @@
 
 param (
     [Parameter(Mandatory=$true)][string]$instance,
-    [Parameter(Mandatory=$true)][string]$username = "admin",
-    [Parameter(Mandatory=$true)][string]$password = "admin",
+    [string]$username = "admin",
+    [string]$password = "admin",
     [Parameter(Mandatory=$true)][string][Alias("path")]$domainObjectPath,
     [string][Alias("filter")]$domainObjectFilter = ".*",
     [Parameter(Mandatory=$true)][string][ValidateSet("INFO", "SUCCESS", "WARNING", "ERROR")][Alias("logLevel")]$domainObjectLogLevel, # INFO | SUCCESS | WARNING | ERROR
     [switch]$list
-)
+    )
 
 # Change policy to trust all certificates, just in case you are using TLS/HTTPS:
 # Use -SkipCertificateCheck in "Invoke-RestMethod" instead, when you are on PScore.
