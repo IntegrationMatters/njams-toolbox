@@ -1,4 +1,4 @@
-## findDomainObjects.ps1
+# findDomainObjects.ps1
 Find domain objects of given nJAMS instance. 
 
 ## Description:
