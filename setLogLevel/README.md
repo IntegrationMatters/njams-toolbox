@@ -3,10 +3,11 @@ Set log level for domain objects with regards to a given domain object path of a
 
 ## Description:
 
-* This script changes the log level of domain objects related to a specified domain object path including its sub elements.
-* The log level can be set to INFO, SUCCESS, WARNING, or ERROR.
-* The script requires to enter the URL of an nJAMS Server instance, including username and password, the domain object path that contains the domain objects that should be applied with new log level, and the new log level. 
-* The script can be executed on any Windows, Linux, or Mac machine within the same network of the machine, where nJAMS Server is running.
+This script changes the log level of domain objects related to a specified domain object path including its sub elements. The log level can be set to INFO, SUCCESS, WARNING, or ERROR.
+
+The script requires to enter the URL of an nJAMS Server instance, including username and password, the domain object path that contains the domain objects that should be applied with new log level, and the new log level. 
+
+The script can be executed on any Windows, Linux, or Mac machine within the same network of the machine, where nJAMS Server is running.
 
 ## Characteristics:
 * allows to change log level for a bunch of domain objects
