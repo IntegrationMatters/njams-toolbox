@@ -1,4 +1,4 @@
-## setLogLevel.ps1
+# setLogLevel.ps1
 Set log level for domain objects with regards to a given domain object path of an nJAMS instance.
 
 ## Description:
