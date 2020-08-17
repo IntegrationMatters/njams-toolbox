@@ -43,11 +43,11 @@
     Sets log level to "ERROR" for all domain objects of domain object path ">prod>finance>invoicing>"and its sub elements.
     
 .EXAMPLE
-    ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">prod>finance>invoicing>" -filter "Order.*" -loglevel "ERROR"
+    ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">prod>finance>invoicing>" -filter "^Order" -loglevel "ERROR"
     Sets log level to "ERROR" for domain objects whose names begin with "Order" of domain object path ">prod>finance>invoicing>" while using default credentials (admin/admin).
 
 .EXAMPLE
-    ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">test>" -loglevel "ERROR" -filter ".*TargetSAP.*" -list
+    ./setLogLevel.ps1 -instance "http://localhost:8080/njams" -path ">test>" -loglevel "ERROR" -filter "TargetSAP" -list
     Lists matching domain objects, while checking communication to nJAMS Client(s). Log level settings remain unchanged. 
 	
 .LINK
