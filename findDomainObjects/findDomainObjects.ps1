@@ -111,31 +111,42 @@ param (
     [int]$parentId = 0
     )
 
-# Determine for what kind of domain object type the user is searching:
+# Determine for what kind of domain object type the user is searching for:
 # all: print all domain objects types
 # client: print domain objects of type "Client"
 # process: print domain objects of type "Process"
 $findClientDomainObjects = $false
 $findProcessDomainObjects = $false
 $findAllDomainObjects = $false
-if ($PSBoundParameters.ContainsKey('versionNumber') -eq $True -or
-    $PSBoundParameters.ContainsKey('sdkVersion') -eq $True -or
-    $PSBoundParameters.ContainsKey('machineName') -eq $True -or
-    $PSBoundParameters.ContainsKey('logMode') -eq $True) {
 
-        $findClientDomainObjects = $True
-    }
-if ($PSBoundParameters.ContainsKey('logLevel') -eq $True -or 
-    $PSBoundParameters.ContainsKey('exclude') -eq $True) {
-
-        $findProcessDomainObjects = $True
-}
 if ($PSBoundParameters.ContainsKey('name') -eq $True -or
     $PSBoundParameters.ContainsKey('category') -eq $True -or
     $PSBoundParameters.ContainsKey('stripOnSuccess') -eq $True -or
     $PSBoundParameters.ContainsKey('retention') -eq $True) {
 
         $findAllDomainObjects = $True
+}
+if ($PSBoundParameters.ContainsKey('versionNumber') -eq $True -or
+    $PSBoundParameters.ContainsKey('sdkVersion') -eq $True -or
+    $PSBoundParameters.ContainsKey('machineName') -eq $True -or
+    $PSBoundParameters.ContainsKey('logMode') -eq $True) {
+
+        $findClientDomainObjects = $True
+
+        # If 'name' is used additionally, assume searching for name is only related to client objects:
+        if ($PSBoundParameters.ContainsKey('name') -eq $True) {
+            $findAllDomainObjects = $false
+        }
+}
+if ($PSBoundParameters.ContainsKey('logLevel') -eq $True -or 
+    $PSBoundParameters.ContainsKey('exclude') -eq $True) {
+
+        $findProcessDomainObjects = $True
+
+        # If 'name' is used additionally, assume searching for name is only related to process objects:
+        if ($PSBoundParameters.ContainsKey('name') -eq $True) {
+            $findAllDomainObjects = $false
+        }
 }
 if ($PSBoundParameters.ContainsKey('name') -eq $false -and
     $PSBoundParameters.ContainsKey('category') -eq $false -and
@@ -210,7 +221,6 @@ function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
                         [string]$processDomainObject.category -match $category -and 
                         [string]$processDomainObject.stripOnSuccess -like $stripOnSuccess -and 
                         [string]$processDomainObject.retention -match $retention) {
-                            # Write-Output "Category: $($processDomainObject.category), LogLevel: $($processDomainObject.logLevel), Exclude: $($processDomainObject.exclude), StripOnSuccess: $($processDomainObject.stripOnSuccess), Retention: $($processDomainObject.retention), DO: $($do.id) $($do.path)"
                             $outputDO = New-Object PSObject -Property @{
                                 Version             = ""
                                 'SDK Version'       = ""
@@ -250,8 +260,6 @@ function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
                         [string]$clientDomainObject.category -match $category -and
                         [string]$clientDomainObject.stripOnSuccess -like $stripOnSuccess -and 
                         [string]$clientDomainObject.retention -match $retention) {
-                            # Write-Output "Category: $($clientDomainObject.category), Version: $($clientDomainObject.versionNumber), SDK: $($clientDomainObject.sdkVersion), logMode: $($clientDomainObject.logMode), Machine: $($clientDomainObject.machineName), StripOnSuccess: $($clientDomainObject.stripOnSuccess), Retention: $($clientDomainObject.retention), DO: $($clientDomainObject.id) $($clientDomainObject.objectPath)"
-
                             $outputDO = New-Object PSObject -Property @{
                                 Version             = $($clientDomainObject.versionNumber)
                                 'SDK Version'       = $($clientDomainObject.sdkVersion)
@@ -283,7 +291,6 @@ function fnBrowseDomainObjects ([string]$doId, [string]$doType) {
                         [string]$anyDomainObject.category -match $category -and 
                         [string]$anyDomainObject.stripOnSuccess -like $stripOnSuccess -and 
                         [string]$anyDomainObject.retention -match $retention) {
-                            # Write-Output "Category: $($anyDomainObject.category), StripOnSuccess: $($anyDomainObject.stripOnSuccess), Retention: $($anyDomainObject.retention), DO: $($anyDomainObject.id) $($anyDomainObject.objectPath)"
                             $outputDO = New-Object PSObject -Property @{
                                 Version             = ""
                                 'SDK Version'       = ""
