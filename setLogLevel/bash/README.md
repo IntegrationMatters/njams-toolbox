@@ -34,7 +34,7 @@ domainObjectLogLevel="ERROR" # INFO | SUCCESS | WARNING | ERROR
 Run a shell and enter command:
 
 ```
-$ setLogLevel.sh
+$ ./setLogLevel.sh
 ```
 
 ## Prerequisites:
