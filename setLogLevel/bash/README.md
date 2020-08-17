@@ -22,9 +22,13 @@ The script runs on Linux/Unix using bash.
 ## Example:
 
 njamsInstanceUrl="http://10.189.0.137:8080/njams"
+
 njamsUser="admin"
+
 njamsPW="admin"
+
 domainObjectPath="%3Eprod%3Efinance%3Einvoicing%3E"
+
 domainObjectLogLevel="ERROR" # INFO | SUCCESS | WARNING | ERROR
 
 ## Execution:
