@@ -162,7 +162,6 @@ if ($PSBoundParameters.ContainsKey('name') -eq $false -and
         $findAllDomainObjects = $True
 }
 
-
 # Change policy to trust all certificates, just in case you are using TLS/HTTPS:
 # Use -SkipCertificateCheck in "Invoke-RestMethod" instead, when you are on PScore.
 # For Windows PowerShell 5 use the following:
