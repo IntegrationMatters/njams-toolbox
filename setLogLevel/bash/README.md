@@ -39,10 +39,12 @@ $ setLogLevel.sh
 
 ## Prerequisites:
 
-  This script requires *jq 1.5*. JQ is a lightweight and flexible command-line JSON processor. See https://stedolan.github.io/jq/ for more information about *jq*.
+1.  This script requires *jq 1.5*. JQ is a lightweight and flexible command-line JSON processor. See https://stedolan.github.io/jq/ for more information about *jq*.
 
-  Installation: 
+    Installation: 
   
-  ```
-  sudo apt-get install jq
-  ```
+    ```
+    sudo apt-get install jq
+    ```
+
+2.  The script requires permission to write the session cookie file 'cookiefile' in the directiory, where the script is executed. 
