@@ -6,13 +6,18 @@ Set log level for domain objects with regards to a given domain object path of a
 This script changes the log level of domain objects related to a specified domain object path. The log level can be set to INFO, SUCCESS, WARNING, or ERROR.
 
 It is required to modify the following variables in the script according to your requirements:
+
 * njamsInstanceUrl - the url of your nJAMS Server instance
+
 * njamsUser - nJAMS username
+
 * njamsPW - password of nJAMS user
+
 * domainObjectPath - the path of domain objects you want to change the log level
+
 * domainObjectLogLevel - new log level
 
-The script runs on Linux using bash.
+The script runs on Linux/Unix using bash.
 
 ## Example:
 
@@ -24,16 +29,15 @@ domainObjectLogLevel="ERROR" # INFO | SUCCESS | WARNING | ERROR
 
 ## Execution:
 
-* Linux/Unix:
+Run a shell and enter command:
 
-  Run a shell and enter command:
+```
+$ setLogLevel.sh
+```
 
-  ```
-  $ setLogLevel.sh
-  ```
 ## Prerequisites:
 
-  This script requires *jq 1.5*. JQ is a lightweigth and flexible command-line JSON processor. See https://stedolan.github.io/jq/ for more information about *jq*.
+  This script requires *jq 1.5*. JQ is a lightweight and flexible command-line JSON processor. See https://stedolan.github.io/jq/ for more information about *jq*.
 
   Installation: 
   
