@@ -55,10 +55,10 @@
     https://www.integrationmatters.com/
 
 .NOTES
-    Version:    1.0.0
+    Version:    1.0.1
     Copyright:  (c) Integration Matters
     Author:     Stephan Holters
-    Date:       August 2020
+    Date:       September 2020
 
 #>
 
@@ -97,6 +97,8 @@ $allProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
 catch {
     # Just proceed without fuss.
     # write-host "Type name 'TrustAllCertsPolicy' already exist."
+
+    Continue
 }
 
 # Recursively loop each element and set log level:
@@ -133,31 +135,58 @@ function fnSetLogLevel ([string]$doId, [string]$doType) {
         if ([string]$do.hasChildren -eq "False") {
             # If domain object is of type "process" and matches filter:
             if ([string]$do.type -like "*process*" -and $do.name -match $filterProcess) {
+                try {
+                    if ($list) {
+                        if ($PSVersionTable.PSEdition -eq "Core") {
+                            $processDomainObject = Invoke-RestMethod -Method GET -Header $myHeaderAcceptJson -ContentType "application/json" -SkipCertificateCheck -uri "$instance/api/domainobject/refresh/$($do.id)" -WebSession $mySession
+                        }
+                        else {
+                            $processDomainObject = Invoke-RestMethod -Method GET -Header $myHeaderAcceptJson -ContentType "application/json" -uri "$instance/api/domainobject/refresh/$($do.id)" -WebSession $mySession
+                        }
 
-                if ($list) {
-                    if ($PSVersionTable.PSEdition -eq "Core") {
-                        $processDomainObject = Invoke-RestMethod -Method GET -Header $myHeaderAcceptJson -ContentType "application/json" -SkipCertificateCheck -uri "$instance/api/domainobject/refresh/$($do.id)" -WebSession $mySession
+                        $outputDO = New-Object PSObject -Property @{
+                            Id                  = $($do.id)
+                            Name                = $($do.name)
+                            'LogLevel'          = $($processDomainObject.logLevel)
+                            Path                = $($do.path)
+                        }
+
+                        write-output $outputDO
                     }
                     else {
-                        $processDomainObject = Invoke-RestMethod -Method GET -Header $myHeaderAcceptJson -ContentType "application/json" -uri "$instance/api/domainobject/refresh/$($do.id)" -WebSession $mySession
+                        Write-Output "Set LogLevel=$domainObjectLogLevel for domain object: $($do.id), $($do.name)... "
+                        if ($PSVersionTable.PSEdition -eq "Core") {
+                            Invoke-RestMethod -Method PUT -Header $myHeader -ContentType "application/json" -SkipCertificateCheck -Body $myLogLevel -uri "$instance/api/domainobject/$($do.id)" -WebSession $mySession
+                        }
+                        else {
+                            Invoke-RestMethod -Method PUT -Header $myHeader -ContentType "application/json" -Body $myLogLevel -uri "$instance/api/domainobject/$($do.id)" -WebSession $mySession
+                        }
                     }
-
-                    $outputDO = New-Object PSObject -Property @{
-                        Id                  = $($do.id)
-                        Name                = $($do.name)
-                        'LogLevel'          = $($processDomainObject.logLevel)
-                        Path                = $($do.path)
-                    }
-
-                    write-output $outputDO
                 }
-                else {
-                    Write-Output "Set LogLevel=$domainObjectLogLevel for domain object: $($do.id), $($do.name)... "
+                catch {
                     if ($PSVersionTable.PSEdition -eq "Core") {
-                        Invoke-RestMethod -Method PUT -Header $myHeader -ContentType "application/json" -SkipCertificateCheck -Body $myLogLevel -uri "$instance/api/domainobject/$($do.id)" -WebSession $mySession
+                        $parsedError = $_.ErrorDetails.Message | ConvertFrom-Json
                     }
                     else {
-                        Invoke-RestMethod -Method PUT -Header $myHeader -ContentType "application/json" -Body $myLogLevel -uri "$instance/api/domainobject/$($do.id)" -WebSession $mySession
+                        $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                        $reader.BaseStream.Position = 0
+                        $reader.DiscardBufferedData()
+                        $parsedError = $reader.ReadToEnd() | ConvertFrom-Json
+                    }
+
+                    # If nJAMS Client is not responding continue with next domain object:
+                    if ($($parsedError.errorCode) -eq "00102" -or
+                        $($parsedError.errorCode) -eq "00103") {
+                        write-host "$($parsedError.message) - script continues."
+
+                        continue
+                    }
+                    # Else print error and exit script.
+                    else {
+                        write-host "Error calling nJAMS Rest/API due to:" -ForegroundColor Red
+                        write-host "$_.Exception.Message"
+
+                        Exit
                     }
                 }
             }
@@ -210,7 +239,7 @@ catch {
 	write-host "Unable to retrieve domain object id from given path of nJAMS instance due to:" -ForegroundColor Red
     write-host "$_.Exception.Message"
 
-	Exit
+    Exit
 }
 
 # (3) Set log level of all processes and sub processes of secified domain object path:
