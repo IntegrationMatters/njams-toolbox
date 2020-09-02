@@ -75,6 +75,7 @@ param (
 # Change policy to trust all certificates, just in case you are using TLS/HTTPS:
 # Use -SkipCertificateCheck in "Invoke-RestMethod" instead, when you are on PScore.
 # For Windows PowerShell 5 use the following:
+try {
 if ($PSVersionTable.PSEdition -ne "Core") {
 Add-Type @"
 using System.Net;
@@ -91,6 +92,11 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 # Set Tls versions
 $allProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
 [System.Net.ServicePointManager]::SecurityProtocol = $allProtocols
+}
+}
+catch {
+    # Just proceed without fuss.
+    # write-host "Type name 'TrustAllCertsPolicy' already exist."
 }
 
 # Recursively loop each element and set log level:
