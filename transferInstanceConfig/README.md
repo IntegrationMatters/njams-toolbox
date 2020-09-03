@@ -9,13 +9,13 @@ You can specify individual configurations to transfer.
 
 The following configurations can be transfered:
 
-* config - basic settings of an nJAMS Server instance such as name of instance, search options, retention settings, etc.
-* ldap - settings of a LDAP configuration
-* dataProvider - settings of Data Providers including JMS and JNDI configurations
-* mail - settings of a smtp server
-* argos - settings of Argos configuration
-* indexer - settings of the Indexer configuration
-* user - user accounts and roles including assignments
+* **config** - basic settings of an nJAMS Server instance such as name of instance, search options, retention settings, etc.
+* **ldap** - settings of a LDAP configuration
+* **dataProvider** - settings of Data Providers including JMS and JNDI configurations
+* **mail** - settings of a smtp server
+* **argos** - settings of Argos configuration
+* **indexer** - settings of the Indexer configuration
+* **user** - user accounts and roles including assignments
 
 If you do not specify a particular configuration, all configurations are transferred to the target nJAMS instance.
 The script outputs the transferred configurations.
@@ -25,9 +25,9 @@ The script can be executed on any Linux/Unix, Windows, or Mac machine within the
   Passwords are transfered encrypted from source instance. That means the transferred passwords cannot be decrypted by the target instance and are therefore invalid!
   There are two options with regards to passwords:
   1. You have to reset the passwords later in the target instance
-  2. Another option is to replace 'keyfile.bin' of target instance with 'keyfile.bin' from source instance. 
-      'keyfile.bin' is used to encrypt/decrypt passwords and can just be copied from the source machine to the target machine. 
-      The keyfile usually resides in <njams-installation-dir>/data. 
+  2. Another option is to replace ´keyfile.bin´ of target instance with ´keyfile.bin´ from source instance. 
+      ´keyfile.bin´ is used to encrypt/decrypt passwords and can just be copied from the source machine to the target machine. 
+      The keyfile usually resides in ´<njams-installation-dir>/data´. 
       Restart target nJAMS instance afterwards and the target instance is now able to decrypt the transferred passwords.
   
   Exception:
@@ -44,16 +44,6 @@ The script can be executed on any Linux/Unix, Windows, or Mac machine within the
 * Source and target nJAMS instances must be up and running
 * Specified user accounts for source and target instances must be of role 'admin'. 
 * Double check if the target instance is correct and its configuration may be modified.
-
-
-## Characteristics:
-
-* allows to change log level for a bunch of domain objects
-* allows RegEx in filter criterion to limit domain object selection of domain object path
-* parameter "list" allows to only list domain objects without changing the log level.
-* supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS.
-* script runs on Windows, Linux, and macOS using PowerShell Core 7 or Windows PowerShell 5
-* output can be formatted individually by common PowerShell `format` cmdlet
 
 ## Usage:
 
