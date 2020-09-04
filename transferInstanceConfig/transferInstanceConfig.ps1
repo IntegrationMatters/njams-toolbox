@@ -171,17 +171,9 @@ $allProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
 # General header for request:
 $reqHeader = @{"Authorization" = "Basic"+[System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes('"$username:$password"'))}
 
-<#
+# This function calls nJAMS Rest/API and returns result:
 function fnCallRestApi ($method, $requestHeader, $contentType, $requestBody, $uri, $session) {
-
-write-host $session
-write-host $uri
-write-host $requestBody
-write-host $contentType
-write-host $requestHeader
-write-host $method
-
-# Calls nJAMS Rest/API:
+    # Calls nJAMS Rest/API depending on psversion and request body:
     if ($requestBody) {
         if ($PSVersionTable.PSEdition -eq "Core") {
             $responseObject = Invoke-RestMethod -Method $method -Header $requestHeader -ContentType $contentType -SkipCertificateCheck -Body $requestBody -uri $uri -WebSession $session
@@ -200,7 +192,6 @@ write-host $method
     }
     return $responseObject
 }
-#>
 
 function fnStopDataProviders ($tgtInstance, $tgtWebSession) {
 
@@ -571,24 +562,28 @@ function fnTransferDPConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWeb
 
 function fnTransferSimpleConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSession, $optOverwrite, $configName, $method, $apiCall) {
     # Get configurations from source instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
+    $sourceSimpleConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/$apiCall" $srcWebSession
+
+    <#if ($PSVersionTable.PSEdition -eq "Core") {
         $sourceSimpleConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$srcInstance/$apiCall" -WebSession $srcWebSession
     }
     else {
         $sourceSimpleConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$srcInstance/$apiCall" -WebSession $srcWebSession
-    }
+    }#>
 
     # Convert custom object to JSON:
     $targetRequestBody = $sourceSimpleConfigObject | ConvertTo-Json
 
     # Update configuration in target instance
     $targetResult = $null
-    if ($PSVersionTable.PSEdition -eq "Core") {
+    $targetResult = fnCallRestApi $method $reqHeader "application/json" $targetRequestBody "$tgtInstance/$apiCall" $tgtWebSession
+
+    <#if ($PSVersionTable.PSEdition -eq "Core") {
         $targetResult = Invoke-RestMethod -Method $method -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/$apiCall" -WebSession $tgtWebSession
     }
     else {
         $targetResult = Invoke-RestMethod -Method $method -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/$apiCall" -WebSession $tgtWebSession
-    }
+    }#>
 
     if ($targetResult) {
         write-host "$configName config transfered."
@@ -874,7 +869,9 @@ function fnTransferConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSe
                 $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/configuration" -WebSession $tgtWebSession
             }
 
-            write-host "Config '$($sourceConfig.name)' of component '$($sourceConfig.component)' transfered."
+            if ($targetResult) {
+                write-host "Config '$($sourceConfig.name)' of component '$($sourceConfig.component)' transfered."
+            }
         }
     }
     return $true
@@ -891,7 +888,6 @@ try {
     }
     else {
         $sourceUserId = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -Body $sourceRequestBody -uri "$sourceInstance/api/usermanagement/authentication" -SessionVariable sourceSession
-        #$sourceUserId = fnCallRestApi "POST" $reqHeader "application/json" $sourceRequestBody "$sourceInstance/api/usermanagement/authentication" $sourceSession
     }
 } 
 catch {
@@ -922,6 +918,16 @@ catch {
 
 # (2) Transfer specified configurations:
 if ($sourceUserId -and $targetUserId) {
+
+    # Confirm transfer to target instance:
+    write-host "Logged in successfully into source and target instances."
+    write-host "You are going to transfer configuration from source nJAMS instance '$sourceInstance' to target '$targetInstance'. Configuration of target instance will be changed. " -ForegroundColor Yellow
+    $userInput = read-host "Do you want to continue? [Y] Yes  [N] No"
+    if ($userInput.ToLower() -ne "y" -and $userInput.ToLower() -ne "yes") {
+        write-host "Ok, transfer is not executed. Target instance remains unchanged."
+    
+        Exit
+    }
 
     # Transfer Data Provider(s) including JMS and JNDI connection(s):
     try {
