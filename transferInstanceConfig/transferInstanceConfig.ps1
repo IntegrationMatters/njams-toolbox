@@ -190,6 +190,7 @@ function fnCallRestApi ($method, $requestHeader, $contentType, $requestBody, $ur
             $responseObject = Invoke-RestMethod -Method $method -Header $requestHeader -ContentType $contentType -uri $uri -WebSession $session
         }
     }
+    
     return $responseObject
 }
 
@@ -210,13 +211,10 @@ function fnStopDataProviders ($tgtInstance, $tgtWebSession) {
     {
         # Define target request body:
         $targetRequestBody = '{ "start": "false" }'
+        
         $targetResult = $null
-        if ($PSVersionTable.PSEdition -eq "Core") {
-            $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/dataprovider/$($dataProvider.id)" -WebSession $tgtWebSession
-        }
-        else {
-            $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/dataprovider/$($dataProvider.id)" -WebSession $tgtWebSession
-        }
+        $targetResult = fnCallRestApi "PUT" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/dataprovider/$($dataProvider.id)" $tgtWebSession
+
         if ($targetResult) {
             write-host "Data provider '$($dataProvider.name)' stopped."
         }
@@ -231,13 +229,8 @@ function fnStopIndexer ($tgtInstance, $tgtWebSession) {
     $targetRequestBody = '{ "start": "false" }'
     
     $targetResult = $null
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/indexer/component" -WebSession $tgtWebSession
-    }
-    else {
-        $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/indexer/component" -WebSession $tgtWebSession
-    }
-    
+    $targetResult = fnCallRestApi "PUT" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/indexer/component" $tgtWebSession
+
     if ($targetResult) {
         write-host "Indexer stopped."
     }
@@ -245,20 +238,10 @@ function fnStopIndexer ($tgtInstance, $tgtWebSession) {
 
 function fnTransferJNDIConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSession, $optOverwrite) {
     # Get configurations from source instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $sourceJNDIConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$srcInstance/api/jndiconnection" -WebSession $srcWebSession
-    }
-    else {
-        $sourceJNDIConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$srcInstance/api/jndiconnection" -WebSession $srcWebSession
-    }
+    $sourceJNDIConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/jndiconnection" $srcWebSession
 
     # Get possible existing configurations from target instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $targetJNDIConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$tgtInstance/api/jndiconnection" -WebSession $tgtWebSession
-    }
-    else {
-       $targetJNDIConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$tgtInstance/api/jndiconnection" -WebSession $tgtWebSession
-    }
+    $targetJNDIConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/jndiconnection" $tgtWebSession
 
     # Loop through source configurations:
     Foreach ($sourceConfig in $sourceJNDIConfigObject)
@@ -279,12 +262,7 @@ function fnTransferJNDIConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtW
 
             # Add new configuration to target instance
             $targetResult = $null
-            if ($PSVersionTable.PSEdition -eq "Core") {
-                $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/jndiconnection" -WebSession $tgtWebSession
-            }
-            else {
-                $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/jndiconnection" -WebSession $tgtWebSession
-            }
+            $targetResult = fnCallRestApi "POST" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/jndiconnection" $tgtWebSession
 
             if ($targetResult) {
                 write-host "JNDI config '$($sourceConfig.name)' transfered."
@@ -302,12 +280,7 @@ function fnTransferJNDIConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtW
 
                 # Overwrite existing target configuration with source configuration:
                 $targetResult = $null
-                if ($PSVersionTable.PSEdition -eq "Core") {
-                    $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/jndiconnection" -WebSession $tgtWebSession
-                }
-                else {
-                    $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/jndiconnection" -WebSession $tgtWebSession
-                }
+                $targetResult = fnCallRestApi "PUT" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/jndiconnection" $tgtWebSession
 
                 if ($targetResult) {
                     write-host "Existing JNDI config in target instance updated: '$($targetConfig.name)'"
@@ -324,28 +297,13 @@ function fnTransferJNDIConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtW
 
 function fnTransferJMSConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSession, $optOverwrite, $srcJNDIConfigObject) {
     # Get configurations from source instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $sourceJMSConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$srcInstance/api/jmsconnection" -WebSession $srcWebSession
-    }
-    else {
-        $sourceJMSConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$srcInstance/api/jmsconnection" -WebSession $srcWebSession
-    }
+    $sourceJMSConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/jmsconnection" $srcWebSession
 
     # Get possible existing configurations from target instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $targetJMSConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$tgtInstance/api/jmsconnection" -WebSession $tgtWebSession
-    }
-    else {
-        $targetJMSConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$tgtInstance/api/jmsconnection" -WebSession $tgtWebSession
-    }
-
+    $targetJMSConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/jmsconnection" $tgtWebSession
+    
     # Get existing JNDI configurations from target instance to be able to reference JMS connection to the corresponding JNDI connection:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $targetJNDIConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$tgtInstance/api/jndiconnection" -WebSession $tgtWebSession
-    }
-    else {
-        $targetJNDIConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$tgtInstance/api/jndiconnection" -WebSession $tgtWebSession
-    }
+    $targetJNDIConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/jndiconnection" $tgtWebSession
 
     # Loop through source configurations:
     Foreach ($sourceConfig in $sourceJMSConfigObject)
@@ -403,12 +361,7 @@ function fnTransferJMSConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWe
 
             # Add new configuration to target instance
             $targetResult = $null
-            if ($PSVersionTable.PSEdition -eq "Core") {
-                $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/jmsconnection" -WebSession $tgtWebSession
-            }
-            else {
-                $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/jmsconnection" -WebSession $tgtWebSession
-            }
+            $targetResult = fnCallRestApi "POST" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/jmsconnection" $tgtWebSession
 
             if ($targetResult) {
                 write-host "JMS config '$($sourceConfig.name)' transfered."
@@ -427,12 +380,7 @@ function fnTransferJMSConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWe
 
                 # Overwrite existing target configuration with source configuration:
                 $targetResult = $null
-                if ($PSVersionTable.PSEdition -eq "Core") {
-                    $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/jmsconnection" -WebSession $tgtWebSession
-                }
-                else {
-                    $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/jmsconnection" -WebSession $tgtWebSession
-                }
+                $targetResult = fnCallRestApi "PUT" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/jmsconnection" $tgtWebSession
 
                 if ($targetResult) {
                     write-host "Existing JMS config in target instance updated: '$($targetConfig.name)'"
@@ -448,28 +396,13 @@ function fnTransferJMSConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWe
 
 function fnTransferDPConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSession, $optOverwrite, $srcJMSConfigObject) {
     # Get configurations from source instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $sourceDPConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$srcInstance/api/jmsdataproviderconfig" -WebSession $srcWebSession
-    }
-    else {
-        $sourceDPConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$srcInstance/api/jmsdataproviderconfig" -WebSession $srcWebSession
-    }
+    $sourceDPConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/jmsdataproviderconfig" $srcWebSession
 
     # Get possible existing configurations from target instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $targetDPConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$tgtInstance/api/jmsdataproviderconfig" -WebSession $tgtWebSession
-    }
-    else {
-        $targetDPConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$tgtInstance/api/jmsdataproviderconfig" -WebSession $tgtWebSession
-    }
-
+    $targetDPConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/jmsdataproviderconfig" $tgtWebSession
+    
     # Get existing JMS configurations from target instance to be able to reference DP config to the corresponding JMS connection:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $targetJMSConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$tgtInstance/api/jmsconnection" -WebSession $tgtWebSession
-    }
-    else {
-        $targetJMSConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$tgtInstance/api/jmsconnection" -WebSession $tgtWebSession
-    }
+    $targetJMSConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/jmsconnection" $tgtWebSession
 
     # Loop through source configurations:
     Foreach ($sourceConfig in $sourceDPConfigObject)
@@ -499,20 +432,10 @@ function fnTransferDPConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWeb
 
             # Add new configuration to target instance
             $targetResult = $null
-            if ($PSVersionTable.PSEdition -eq "Core") {
-                $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/jmsdataproviderconfig" -WebSession $tgtWebSession
-            }
-            else {
-                $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/jmsdataproviderconfig" -WebSession $tgtWebSession
-            }
+            $targetResult = fnCallRestApi "POST" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/jmsdataproviderconfig" $tgtWebSession
 
             # Link Data Provider with JMS connection:
-            if ($PSVersionTable.PSEdition -eq "Core") {
-                $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$tgtInstance/api/jmsdataproviderconfig/name/$($targetRequestObject.name)/jmsconnection/name/$($jmsTargetConfig.name)" -WebSession $tgtWebSession
-            }
-            else {
-                $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -uri "$tgtInstance/api/jmsdataproviderconfig/name/$($targetRequestObject.name)/jmsconnection/name/$($jmsTargetConfig.name)" -WebSession $tgtWebSession
-            }
+            $targetResult = fnCallRestApi "PUT" $reqHeader "application/json" $null "$tgtInstance/api/jmsdataproviderconfig/name/$($targetRequestObject.name)/jmsconnection/name/$($jmsTargetConfig.name)" $tgtWebSession
 
             if ($targetResult) {
                 write-host "DP config '$($sourceConfig.name)' transfered."
@@ -532,21 +455,10 @@ function fnTransferDPConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWeb
 
                 # Overwrite existing target configuration with source configuration:
                 $targetResult = $null
-                if ($PSVersionTable.PSEdition -eq "Core") {
-                    $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/jmsdataproviderconfig" -WebSession $tgtWebSession
-                }
-                else {
-                    $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/jmsdataproviderconfig" -WebSession $tgtWebSession
-                }
+                $targetResult = fnCallRestApi "PUT" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/jmsdataproviderconfig" $tgtWebSession
 
                 # Overwrite link to JMS connection:
-                if ($PSVersionTable.PSEdition -eq "Core") {
-                    $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$tgtInstance/api/jmsdataproviderconfig/name/$($targetRequestObject.name)/jmsconnection/name/$($jmsTargetConfig.name)" -WebSession $tgtWebSession
-
-                }
-                else {
-                    $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -uri "$tgtInstance/api/jmsdataproviderconfig/name/$($targetRequestObject.name)/jmsconnection/name/$($jmsTargetConfig.name)" -WebSession $tgtWebSession
-                }
+                $targetResult = fnCallRestApi "PUT" $reqHeader "application/json" $null "$tgtInstance/api/jmsdataproviderconfig/name/$($targetRequestObject.name)/jmsconnection/name/$($jmsTargetConfig.name)" $tgtWebSession
 
                 if ($targetResult) {
                     write-host "Existing DP config in target instance updated: '$($targetConfig.name)'"
@@ -564,26 +476,12 @@ function fnTransferSimpleConfig ($srcInstance, $srcWebSession, $tgtInstance, $tg
     # Get configurations from source instance:
     $sourceSimpleConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/$apiCall" $srcWebSession
 
-    <#if ($PSVersionTable.PSEdition -eq "Core") {
-        $sourceSimpleConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$srcInstance/$apiCall" -WebSession $srcWebSession
-    }
-    else {
-        $sourceSimpleConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$srcInstance/$apiCall" -WebSession $srcWebSession
-    }#>
-
     # Convert custom object to JSON:
     $targetRequestBody = $sourceSimpleConfigObject | ConvertTo-Json
 
     # Update configuration in target instance
     $targetResult = $null
     $targetResult = fnCallRestApi $method $reqHeader "application/json" $targetRequestBody "$tgtInstance/$apiCall" $tgtWebSession
-
-    <#if ($PSVersionTable.PSEdition -eq "Core") {
-        $targetResult = Invoke-RestMethod -Method $method -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/$apiCall" -WebSession $tgtWebSession
-    }
-    else {
-        $targetResult = Invoke-RestMethod -Method $method -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/$apiCall" -WebSession $tgtWebSession
-    }#>
 
     if ($targetResult) {
         write-host "$configName config transfered."
@@ -594,20 +492,10 @@ function fnTransferSimpleConfig ($srcInstance, $srcWebSession, $tgtInstance, $tg
 
 function fnTransferRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSession, $optOverwrite) {
     # Get configurations from source instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $sourceRolesObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$srcInstance/api/usermanagement/roles" -WebSession $srcWebSession
-    }
-    else {
-        $sourceRolesObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$srcInstance/api/usermanagement/roles" -WebSession $srcWebSession
-    }
+    $sourceRolesObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/usermanagement/roles" $srcWebSession
 
     # Get possible existing configurations from target instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $targetRolesObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$tgtInstance/api/usermanagement/roles" -WebSession $tgtWebSession
-    }
-    else {
-       $targetRolesObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$tgtInstance/api/usermanagement/roles" -WebSession $tgtWebSession
-    }
+    $targetRolesObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/roles" $tgtWebSession
 
     # Loop through source configurations:
     # take all roles, also roles that were synced via LDAP:
@@ -634,12 +522,7 @@ function fnTransferRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSes
 
             # Add new configuration to target instance
             $targetResult = $null
-            if ($PSVersionTable.PSEdition -eq "Core") {
-                $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/usermanagement/roles" -WebSession $tgtWebSession
-            }
-            else {
-                $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/usermanagement/roles" -WebSession $tgtWebSession
-            }
+            $targetResult = fnCallRestApi "POST" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/usermanagement/roles" $tgtWebSession
 
             if ($targetResult) {
                 write-host "Role '$($sourceConfig.rolename)' transfered."
@@ -657,13 +540,8 @@ function fnTransferRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSes
 
                 # Overwrite existing target configuration with source configuration:
                 $targetResult = $null
-                if ($PSVersionTable.PSEdition -eq "Core") {
-                    $tgtResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/usermanagement/roles" -WebSession $tgtWebSession
-                }
-                else {
-                    $tgtResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/usermanagement/roles" -WebSession $tgtWebSession
-                }
-
+                $targetResult = fnCallRestApi "PUT" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/usermanagement/roles" $tgtWebSession
+                
                 if ($targetResult) {
                     write-host "Existing role in target instance updated: '$($targetConfig.rolename)'"
                 }
@@ -679,20 +557,10 @@ function fnTransferRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSes
 
 function fnTransferUsers ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSession, $optOverwrite) {
     # Get configurations from source instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $sourceUsersObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$srcInstance/api/usermanagement/users" -WebSession $srcWebSession
-    }
-    else {
-        $sourceUsersObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$srcInstance/api/usermanagement/users" -WebSession $srcWebSession
-    }
+    $sourceUsersObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/usermanagement/users" $srcWebSession
 
     # Get possible existing configurations from target instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $targetUsersObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$tgtInstance/api/usermanagement/users" -WebSession $tgtWebSession
-    }
-    else {
-       $targetUsersObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$tgtInstance/api/usermanagement/users" -WebSession $tgtWebSession
-    }
+    $targetUsersObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/users" $tgtWebSession
 
     # Loop through source configurations and
     # take all users, also users that were synced via LDAP:
@@ -717,12 +585,7 @@ function fnTransferUsers ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSes
 
             # Add new configuration to target instance
             $targetResult = $null
-            if ($PSVersionTable.PSEdition -eq "Core") {
-                $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/usermanagement/users" -WebSession $tgtWebSession
-            }
-            else {
-                $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/usermanagement/users" -WebSession $tgtWebSession
-            }
+            $targetResult = fnCallRestApi "POST" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/usermanagement/users" $tgtWebSession
 
             if ($targetResult) {
                 write-host "User '$($sourceConfig.username)' transfered."
@@ -740,12 +603,7 @@ function fnTransferUsers ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSes
 
                 # Overwrite existing target configuration with source configuration:
                 $targetResult = $null
-                if ($PSVersionTable.PSEdition -eq "Core") {
-                    $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/usermanagement/users" -WebSession $tgtWebSession
-                }
-                else {
-                    $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/usermanagement/users" -WebSession $tgtWebSession
-                }
+                $targetResult = fnCallRestApi "PUT" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/usermanagement/users" $tgtWebSession
 
                 if ($targetResult) {
                     write-host "Existing user in target instance updated: '$($targetConfig.username)'"
@@ -760,74 +618,66 @@ function fnTransferUsers ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSes
     return $sourceUsersObject
 }
 
-function fnTransferUsersRoles ($tgtInstance, $tgtWebSession, $optOverwrite, $srcRolesObject, $srcUsersObject) {
+function fnTransferUsersRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSession, $optOverwrite, $srcRolesObject) {
 
     # Get roles from target instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $targetRolesObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$tgtInstance/api/usermanagement/roles" -WebSession $tgtWebSession
-    }
-    else {
-        $targetRolesObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$tgtInstance/api/usermanagement/roles" -WebSession $tgtWebSession
-    }
+    $targetRolesObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/roles" $tgtWebSession
 
     # Get users from target instance:
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $targetUsersObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$tgtInstance/api/usermanagement/users" -WebSession $tgtWebSession
-    }
-    else {
-        $targetUsersObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$tgtInstance/api/usermanagement/users" -WebSession $tgtWebSession
-    }
+    $targetUsersObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/users" $tgtWebSession
 
     # Loop through roles of source instance:
-    Foreach ($srcRoles in $srcRolesObject)
+    Foreach ($srcRole in $srcRolesObject)
     {
         # Get matching role from target instance:
-        $tgtRole = $targetRolesObject | where-object { $_.rolename -eq $($srcRoles.rolename) }
+        $tgtRole = $targetRolesObject | where-object { $_.rolename -eq $($srcRole.rolename) }
 
-        # Loop through users of source instance:
-        Foreach ($srcUsers in $srcUsersObject)
-        {
-            # Get matching user from target instance:
-            $tgtUser = $targetUsersObject | where-object { $_.username -eq $($srcUsers.username) }
+        # Get users of this role from source instance:
+        $sourceUsersObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/usermanagement/roles/$($srcRole.id)/users" $srcWebSession
 
+        if ($sourceUsersObject) {
+            # Loop through users of this role in source instance:
+            Foreach ($srcUser in $sourceUsersObject)
+            {
+                # Get matching user from target instance:
+                $tgtUser = $targetUsersObject | where-object { $_.username -eq $($srcUser.username) }
 
-            # Add user to role in target instance:
-            try {
-                $targetResult = $null
-                $targetResult = Invoke-RestMethod -Method PUT -Header $reqHeader -ContentType "text/plain" -Body $($tgtUser.id) -uri "$tgtInstance/api/usermanagement/roles/$($tgtRole.id)/user" -WebSession $tgtWebSession
+                # Add user to role in target instance:
+                try {
+                    $targetResult = $null
+                    $targetResult = fnCallRestApi "PUT" $reqHeader "text/plain" $($tgtUser.id) "$tgtInstance/api/usermanagement/roles/$($tgtRole.id)/user" $tgtWebSession
 
-                if ($targetResult) {
                     write-host "User $($tgtUser.username) ($($tgtUser.id)) added to role $($tgtRole.rolename) ($($tgtRole.id))"
                 }
-            }
-            catch {
-                if ($PSVersionTable.PSEdition -eq "Core") {
-                    $parsedError = $_.ErrorDetails.Message | ConvertFrom-Json
-                }
-                else {
-                    $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
-                    $reader.BaseStream.Position = 0
-                    $reader.DiscardBufferedData()
-                    $parsedError = $reader.ReadToEnd() | ConvertFrom-Json
-                }
+                catch {
+                    if ($PSVersionTable.PSEdition -eq "Core") {
+                        $parsedError = $_.ErrorDetails.Message | ConvertFrom-Json
+                    }
+                    else {
+                        $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                        $reader.BaseStream.Position = 0
+                        $reader.DiscardBufferedData()
+                        $parsedError = $reader.ReadToEnd() | ConvertFrom-Json
+                    }
 
-                # If user/role assignment already exist, continue silently:
-                if ($($parsedError.errorCode) -eq "00005") {
+                    # If user/role assignment already exist, continue silently:
+                    if ($($parsedError.errorCode) -eq "00005") {
 
-                    write-host $($parsedError.message)
-                    continue
-                }
-                # Else print error and exit script.
-                else {
-                    write-host "Error calling nJAMS Rest/API due to:" -ForegroundColor Red
-                    write-host "$_.Exception.Message"
+                        write-host $($parsedError.message)
+                        Continue
+                    }
+                    # Else print error and exit script.
+                    else {
+                        write-host "Error calling nJAMS Rest/API due to:" -ForegroundColor Red
+                        write-host "fnCallRestApi PUT $reqHeader text/plain $($tgtUser.id) $tgtInstance/api/usermanagement/roles/$($tgtRole.id)/user $tgtWebSession" -ForegroundColor Red
+                        write-host "$_.Exception.Message"
 
-                    Exit
+                        Exit
+                    }
                 }
             }
         }
     }
-
     return $true
 }
 
@@ -839,12 +689,7 @@ function fnTransferConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSe
     Foreach ($component in $componentList) 
     {
         # Get configuration of component Njams from source instance:
-        if ($PSVersionTable.PSEdition -eq "Core") {
-            $sourceConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -uri "$srcInstance/api/configuration/$component/*" -WebSession $srcWebSession
-        }
-        else {
-            $sourceConfigObject = Invoke-RestMethod -Method GET -Header $reqHeader -ContentType "application/json" -uri "$srcInstance/api/configuration/$component/*" -WebSession $srcWebSession
-        }
+        $sourceConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/configuration/$component/*" $srcWebSession
 
         # Loop through source configurations:
         Foreach ($sourceConfig in $sourceConfigObject)
@@ -862,12 +707,7 @@ function fnTransferConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSe
             $targetRequestBody = $targetRequestObject | ConvertTo-Json
 
             # Add new configuration to target instance
-            if ($PSVersionTable.PSEdition -eq "Core") {
-                $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -SkipCertificateCheck -Body $targetRequestBody -uri "$tgtInstance/api/configuration" -WebSession $tgtWebSession
-            }
-            else {
-                $targetResult = Invoke-RestMethod -Method POST -Header $reqHeader -ContentType "application/json" -Body $targetRequestBody -uri "$tgtInstance/api/configuration" -WebSession $tgtWebSession
-            }
+            $targetResult = fnCallRestApi "POST" $reqHeader "application/json" $targetRequestBody "$tgtInstance/api/configuration" $tgtWebSession
 
             if ($targetResult) {
                 write-host "Config '$($sourceConfig.name)' of component '$($sourceConfig.component)' transfered."
@@ -1060,7 +900,7 @@ if ($sourceUserId -and $targetUserId) {
 
             # Transfer Users/Roles assignment:
             $result = $null
-            $result = fnTransferUsersRoles $targetInstance $targetSession $overwrite $sourceRolesObject $sourceUsersObject
+            $result = fnTransferUsersRoles $sourceInstance $sourceSession $targetInstance $targetSession $overwrite $sourceRolesObject
 
             if ($sourceRolesObject -and $sourceUsersObject -and $result) {
                 write-host "Transferring user accounts and roles finished."
