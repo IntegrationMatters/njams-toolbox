@@ -62,6 +62,10 @@
     The settings for 'Config', 'LDAP', 'Mail', 'Argos', and 'Indexer' are always replaced by source configuration.
     By default overwrite is off.
 
+.PARAMETER force
+    Transfers configuration without prompting for confirmation.
+    By default, the script prompts for confirmation before transferring configuration. 
+
 .PARAMETER config
     Switch to enable transfer of basic instance configuration regarding the following components: "DataProviderStatistics", "Flows", "JobController", "MainObjects", "Njams", "Notification", "Search", "Statistics", "UserManagement".
     These configurations comprise all settings provided in nJAMS UI at 'Administration > System control > System configuration'.
@@ -99,7 +103,11 @@
 
 .EXAMPLE
     ./transferInstanceConfig.ps1 -sourceInstance "http://source_machine:8080/njams" -targetInstance "http://target_machine:8080/njams" -config -user
-    Transfers basic instance configurations as well as user accounts and roles by using default credentials.
+    Transfers basic instance configuration as well as user accounts and roles by using default credentials.
+
+.EXAMPLE
+    ./transferInstanceConfig.ps1 -sourceInstance "http://source_machine:8080/njams" -targetInstance "http://target_machine:8080/njams" -ldap -force
+    Transfers LDAP configuration without prompting for confirmation.
 
 .LINK
     https://github.com/integrationmatters/njams-toolbox
@@ -131,7 +139,8 @@ param (
     [switch]$indexer,
     [switch]$user,
     # general transfer options:
-    [switch]$overwrite
+    [switch]$overwrite,
+    [switch]$force
     )
 
 # Check for configurations to transfer:
@@ -498,8 +507,7 @@ function fnTransferRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSes
     $targetRolesObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/roles" $tgtWebSession
 
     # Loop through source configurations:
-    # take all roles, also roles that were synced via LDAP:
-    Foreach ($sourceConfig in $sourceRolesObject) # | where-object { [string]::IsNullOrEmpty($_.externalSystem) })
+    Foreach ($sourceConfig in $sourceRolesObject | where-object { [string]::IsNullOrEmpty($_.externalSystem) })
     {
         # Define target request body:
         $targetRequestObject = [PSCustomObject]@{
@@ -562,9 +570,8 @@ function fnTransferUsers ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSes
     # Get possible existing configurations from target instance:
     $targetUsersObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/users" $tgtWebSession
 
-    # Loop through source configurations and
-    # take all users, also users that were synced via LDAP:
-    Foreach ($sourceConfig in $sourceUsersObject) # | where-object { [string]::IsNullOrEmpty($_.externalSystem) })
+    # Loop through source configurations:
+    Foreach ($sourceConfig in $sourceUsersObject | where-object { [string]::IsNullOrEmpty($_.externalSystem) })
     {
         # Define target request body:
         $targetRequestObject = [PSCustomObject]@{
@@ -572,7 +579,12 @@ function fnTransferUsers ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSes
             "firstname" = $($sourceConfig.firstname)
             "lastname" = $($sourceConfig.lastname)
             "email" = $($sourceConfig.email)
-            "propertyMap" = $($sourceConfig.propertyMap)
+            "comment" = $($sourceConfig.comment)
+            "validFrom" = $($sourceConfig.validFrom)
+            "validTo" = $($sourceConfig.validTo)
+            "externalSystem" = $($sourceConfig.externalSystem)
+            "externalId" = $($sourceConfig.externalId)
+            #"propertyMap" = $($sourceConfig.propertyMap)
             }
 
         # Convert custom object to JSON:
@@ -626,8 +638,8 @@ function fnTransferUsersRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtW
     # Get users from target instance:
     $targetUsersObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/users" $tgtWebSession
 
-    # Loop through roles of source instance:
-    Foreach ($srcRole in $srcRolesObject)
+    # Loop through roles of source instance that do not come from external system:
+    Foreach ($srcRole in $srcRolesObject | where-object { [string]::IsNullOrEmpty($_.externalSystem) })
     {
         # Get matching role from target instance:
         $tgtRole = $targetRolesObject | where-object { $_.rolename -eq $($srcRole.rolename) }
@@ -669,7 +681,7 @@ function fnTransferUsersRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtW
                     # Else print error and exit script.
                     else {
                         write-host "Error calling nJAMS Rest/API due to:" -ForegroundColor Red
-                        write-host "fnCallRestApi PUT $reqHeader text/plain $($tgtUser.id) $tgtInstance/api/usermanagement/roles/$($tgtRole.id)/user $tgtWebSession" -ForegroundColor Red
+write-host "fnCallRestApi PUT $reqHeader text/plain $($tgtUser.id) $tgtInstance/api/usermanagement/roles/$($tgtRole.id)/user $tgtWebSession" -ForegroundColor Red
                         write-host "$_.Exception.Message"
 
                         Exit
@@ -760,13 +772,17 @@ catch {
 if ($sourceUserId -and $targetUserId) {
 
     # Confirm transfer to target instance:
-    write-host "Logged in successfully into source and target instances."
-    write-host "You are going to transfer configuration from source nJAMS instance '$sourceInstance' to target '$targetInstance'. Configuration of target instance will be changed. " -ForegroundColor Yellow
-    $userInput = read-host "Do you want to continue? [Y] Yes  [N] No"
-    if ($userInput.ToLower() -ne "y" -and $userInput.ToLower() -ne "yes") {
-        write-host "Ok, transfer is not executed. Target instance remains unchanged."
-    
-        Exit
+    if (!$force) {
+        write-host "Logged in successfully into source and target instances."
+        write-host "You are going to transfer configuration from source nJAMS instance '$sourceInstance' to target '$targetInstance'. Configuration of target instance will be changed. " -ForegroundColor Yellow
+
+        $userInput = read-host "Do you want to continue? [Y] Yes  [N] No"
+
+        if ($userInput.ToLower() -ne "y" -and $userInput.ToLower() -ne "yes") {
+            write-host "Ok, transfer is not executed. Target instance remains unchanged."
+        
+            Exit
+        }
     }
 
     # Transfer Data Provider(s) including JMS and JNDI connection(s):
