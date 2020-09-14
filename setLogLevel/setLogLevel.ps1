@@ -134,7 +134,7 @@ function fnSetLogLevel ([string]$doId, [string]$doType) {
         # If domain object has no children items:
         if ([string]$do.hasChildren -eq "False") {
             # If domain object is of type "process" and matches filter:
-            if ([string]$do.type -like "*process*" -and $do.name -match $filterProcess) {
+            if ([string]$do.type -like "*process*" -and $do.name -match $domainObjectFilter) {
                 try {
                     if ($list) {
                         if ($PSVersionTable.PSEdition -eq "Core") {
