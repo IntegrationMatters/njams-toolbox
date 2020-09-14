@@ -55,7 +55,7 @@
     https://www.integrationmatters.com/
 
 .NOTES
-    Version:    1.0.1
+    Version:    1.0.2
     Copyright:  (c) Integration Matters
     Author:     Stephan Holters
     Date:       September 2020
