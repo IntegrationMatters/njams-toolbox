@@ -9,7 +9,7 @@ You can specify individual configurations to transfer.
 
 The following configurations can be transfered:
 
-* **config** - basic settings of an nJAMS Server instance such as name of instance, search options, retention settings, etc.
+* **config** - basic settings of an nJAMS Server instance such as name of instance, search options, global retention settings, etc.
 * **ldap** - settings of a LDAP configuration
 * **dataProvider** - settings of Data Providers including JMS and JNDI configurations
 * **mail** - settings of a smtp server
