@@ -11,7 +11,6 @@
     * dataProvider - settings of Data Providers including JMS and JNDI configurations
     * mail - settings of a smtp server
     * argos - settings of Argos configuration
-    * indexer - settings of the Indexer configuration
     * user - user accounts and roles including assignments
     
     If you do not specify a particular configuration, all configurations are transferred to the target nJAMS instance.
@@ -82,9 +81,6 @@
 .PARAMETER argos
     Switch to enable transfer of Argos configuration.
     
-.PARAMETER indexer
-    Switch to enable transfer of Indexer configuration. The Indexer is stopped before in target instance.
-    
 .PARAMETER user
     Switch to enable transfer of user accounts and roles as well as their assignments. All users and roles are transferred, including synced LDAP users/roles.
     
@@ -114,7 +110,7 @@
     https://www.integrationmatters.com/
 
 .NOTES
-    Version:    1.0.0
+    Version:    0.9.1
     Copyright:  (c) Integration Matters
     Author:     Stephan Holters
     Date:       September 2020
@@ -136,7 +132,6 @@ param (
     [switch]$dataProvider,
     [switch]$mail,
     [switch]$argos,
-    [switch]$indexer,
     [switch]$user,
     # general transfer options:
     [switch]$overwrite,
@@ -657,9 +652,12 @@ function fnTransferUsersRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtW
                 # Add user to role in target instance:
                 try {
                     $targetResult = $null
-                    $targetResult = fnCallRestApi "PUT" $reqHeader "text/plain" $($tgtUser.id) "$tgtInstance/api/usermanagement/roles/$($tgtRole.id)/user" $tgtWebSession
+                    # If there is a matching user in target instance, add user to role in target instance:
+                    if ($tgtUser) {
+                        $targetResult = fnCallRestApi "PUT" $reqHeader "text/plain" $($tgtUser.id) "$tgtInstance/api/usermanagement/roles/$($tgtRole.id)/user" $tgtWebSession
 
-                    write-host "User $($tgtUser.username) ($($tgtUser.id)) added to role $($tgtRole.rolename) ($($tgtRole.id))"
+                        write-host "User $($tgtUser.username) ($($tgtUser.id)) added to role $($tgtRole.rolename) ($($tgtRole.id))"
+                    }
                 }
                 catch {
                     if ($PSVersionTable.PSEdition -eq "Core") {
@@ -856,6 +854,8 @@ if ($sourceUserId -and $targetUserId) {
     }
 
     # Transfer Indexer configuration:
+    # This is still work in progress, so this function is not yet available.
+    <#
     try {
         if ($indexer -or $transferAll) {
 
@@ -879,6 +879,7 @@ if ($sourceUserId -and $targetUserId) {
     
         Exit
     }
+    #>
 
     # Transfer Argos configuration:
     try {

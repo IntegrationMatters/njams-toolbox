@@ -14,7 +14,6 @@ The following configurations can be transfered:
 * **dataProvider** - settings of Data Providers including JMS and JNDI configurations
 * **mail** - settings of a smtp server
 * **argos** - settings of Argos configuration
-* **indexer** - settings of the Indexer configuration
 * **user** - user accounts and roles including assignments
 
 If you do not specify a particular configuration, all configurations are transferred to the target nJAMS instance.
@@ -57,7 +56,6 @@ SYNTAX
                                   [[-argos]]
                                   [[-config]]
                                   [[-dataProvider]]
-                                  [[-indexer]]
                                   [[-ldap]]
                                   [[-mail]]
                                   [[-user]]
