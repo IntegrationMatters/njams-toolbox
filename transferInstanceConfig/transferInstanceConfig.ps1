@@ -133,6 +133,7 @@ param (
     [switch]$mail,
     [switch]$argos,
     [switch]$user,
+    [switch]$privs,
     # general transfer options:
     [switch]$overwrite,
     [switch]$force
@@ -146,7 +147,8 @@ if ($PSBoundParameters.ContainsKey('config') -eq $false -and
     $PSBoundParameters.ContainsKey('mail') -eq $false -and
     $PSBoundParameters.ContainsKey('argos') -eq $false -and
     $PSBoundParameters.ContainsKey('indexer') -eq $false -and
-    $PSBoundParameters.ContainsKey('user') -eq $false) {
+    $PSBoundParameters.ContainsKey('user') -eq $false -and
+    $PSBoundParameters.ContainsKey('privs') -eq $false) {
 
     $transferAll = $True
 }
@@ -679,7 +681,7 @@ function fnTransferUsersRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtW
                     # Else print error and exit script.
                     else {
                         write-host "Error calling nJAMS Rest/API due to:" -ForegroundColor Red
-write-host "fnCallRestApi PUT $reqHeader text/plain $($tgtUser.id) $tgtInstance/api/usermanagement/roles/$($tgtRole.id)/user $tgtWebSession" -ForegroundColor Red
+                        write-host "fnCallRestApi PUT $reqHeader text/plain $($tgtUser.id) $tgtInstance/api/usermanagement/roles/$($tgtRole.id)/user $tgtWebSession" -ForegroundColor Red
                         write-host "$_.Exception.Message"
 
                         Exit
@@ -726,6 +728,98 @@ function fnTransferConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSe
     }
     return $true
 }
+
+function fnTransferPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSession, $optOverwrite) {
+    # 1. Walk through domain object tree of source instance and get object privileges for all roles of each domain object 
+    # 2. Find equivalent domain object in target instance 
+    # 3. Find equivalent role in target instance
+    # 4. Set object privilege for target role of target domain object
+
+    # Get id of object path of source instance:
+
+    # Define target request body:
+    $sourceRequestObject = [PSCustomObject]@{
+        "objectType" = "DO"
+        "objectPath" = ">fs_endurance>BankleitzahlenService>"
+    }
+
+    # Convert custom object to JSON:
+    $requestBody = $sourceRequestObject | ConvertTo-Json
+
+    # Get id of domain object of source instance:
+    $sourceDomainObject = fnCallRestApi "POST" $reqHeader "application/json" $requestBody "$srcInstance/api/mainobject" $srcWebSession
+
+    # Get id of domain object of target instance:
+    $targetDomainObject = fnCallRestApi "POST" $reqHeader "application/json" $requestBody "$tgtInstance/api/mainobject" $tgtWebSession
+
+    # Get object privileges from domain object of source instance:
+    $sourceDOPrivilegeObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/usermanagement/objects/all/DO/$($sourceDomainObject.id)" $srcWebSession
+
+    # Get all roles from target instance:
+    $targetRolesObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/roles" $tgtWebSession
+
+    # Start looping in do-priv object of source instance, if domain object exists in target instance:
+    If ($targetDomainObject) {
+
+        # Initialize required examination of next level of domain object below:
+        $examineNextLevel = $false
+
+        # Loop through permissions granted to roles for domain object of source instance:
+        Foreach ($sourceDOPriv in $sourceDOPrivilegeObject) 
+        {
+            # Continue, if role in source instance has not Admin system privilege:
+            if (!$sourceDOPriv.roleHasAdminPrivilege) {
+
+                # Find equivalent role in target instance:
+                $targetRole = $targetRolesObject | where-object { $_.rolename -eq $($sourceDOPriv.rolename) }
+
+                # Continue looping, if role exists in target instance:
+                if ($targetRole) {
+                    # Loop through categories of privileges in source instance:
+                    Foreach ($sourceDOPrivCategory in $sourceDOPriv.categories) 
+                    {
+                        # Loop through category names:
+                        foreach ($sourceCategoryName in $sourceDOPrivCategory.psobject.properties.name) 
+                        {
+                            # Loop through privileges:
+                            Foreach ($sourcePriv in $sourceDOPrivCategory.$($sourceCategoryName)) 
+                            {
+                                # Loop through privilege names:
+                                foreach ($privName in $sourcePriv.psobject.properties.name) 
+                                {
+                                    write-host $sourcePriv.$($privName)
+                                    # Grant permission on domain object for role in target instance:
+                                    if ($sourcePriv.$($privName) -eq "GRANTED") {
+                                        
+                                        $targetResult = fnCallRestApi "PUT" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/objects/$($targetRole.id)/DO/$($targetDomainObject.id)/$sourceCategoryName/$privName" $tgtWebSession
+                                        write-host "GRANT " "category: " $sourceCategoryName " " srcDoId: " $($sourceDOPriv.objectId) " tgtDoId: " $($targetDomainObject.id) " tgtRole: " $($targetRole.id) " " $($targetRole.roleName) priv: " $privName " " $sourcePriv.$($privName)
+                                    }
+
+                                    # Revoke permission on domain object for role in target instance:
+                                    if ($sourcePriv.$($privName) -eq "NOT_GRANTED") {
+                                        
+                                        $targetResult = fnCallRestApi "DELETE" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/objects/$($targetRole.id)/DO/$($targetDomainObject.id)/$sourceCategoryName/$privName" $tgtWebSession
+                                        write-host "REVOKE " "category: " $sourceCategoryName " " srcDoId: " $($sourceDOPriv.objectId) " tgtDoId: " $($targetDomainObject.id) " tgtRole: " $($targetRole.id) " " $($targetRole.roleName) priv: " $privName " " $sourcePriv.$($privName)
+                                    }
+
+                                    # If privilege is UNDETERMINED, set flag to examine the next level below this domain object:
+                                    if ($sourcePriv.$($privName) -eq "UNDETERMINED") {
+                                        $examineNextLevel = $true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    write-host "Go to next level? " $examineNextLevel
+
+    return $true
+}
+
 
 # (1) Login:
 # (1.a) Login into source instance:
@@ -951,4 +1045,23 @@ if ($sourceUserId -and $targetUserId) {
         Exit
     }
 
+    # Transfer object privileges:
+    try {
+        if ($privs -or $transferAll) {
+
+            # Tranfer object privs:
+            $result = $null
+            $result = fnTransferPrivs $sourceInstance $sourceSession $targetInstance $targetSession $overwrite
+
+            if ($result) {
+                write-host "Transferring object privileges of instance finished."
+            }
+        }
+    }
+    catch {
+        write-host "Unable to transfer object privileges due to:" -ForegroundColor Red
+        write-host "$_.Exception.Message"
+    
+        Exit
+    }
 }
