@@ -133,7 +133,9 @@ param (
     [switch]$mail,
     [switch]$argos,
     [switch]$user,
-    [switch]$privs,
+    [switch]$objectPrivilege,
+    [Alias("path")]$domainObjectPath = ">",
+    [switch]$systemPrivilege,
     # general transfer options:
     [switch]$overwrite,
     [switch]$force
@@ -148,7 +150,8 @@ if ($PSBoundParameters.ContainsKey('config') -eq $false -and
     $PSBoundParameters.ContainsKey('argos') -eq $false -and
     $PSBoundParameters.ContainsKey('indexer') -eq $false -and
     $PSBoundParameters.ContainsKey('user') -eq $false -and
-    $PSBoundParameters.ContainsKey('privs') -eq $false) {
+    $PSBoundParameters.ContainsKey('objectPrivilege') -eq $false -and
+    $PSBoundParameters.ContainsKey('systemPrivilege') -eq $false) {
 
     $transferAll = $True
 }
@@ -913,6 +916,69 @@ function fnSetDomainObjectPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tg
     return $examineNextLevel
 }
 
+function fnTransferSystemPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSession) {
+# This ifunction transfers all system privileges of roles in source instance to roles in target instance.
+# 1. Get all roles of source instance
+# 2. Get all roles of target instance
+# 3. Get all available system privileges of source instance
+# 4. Get all available system privileges of target instance
+# 5. Loop through roles of source instance, determine sysprivs of each role, and apply sysprivs to role in target instance
+
+    # 1. Get all roles of source instance:
+    $sourceRolesObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/usermanagement/roles/basic" $srcWebSession
+    if (!$sourceRolesObject) {
+        return $false
+    }
+
+    # 2. Get all roles of target instance:
+    $targetRolesObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/roles" $tgtWebSession
+    if (!$targetRolesObject) {
+        return $false
+    }
+
+    # 3. Get all available system privileges of source instance:
+    $sourceSystemPrivilegesObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/usermanagement/privileges" $srcWebSession
+    if (!$sourceSystemPrivilegesObject) {
+        return $false
+    }
+
+    # 4. Get all available system privileges of target instance:
+    $targetSystemPrivilegesObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/privileges" $tgtWebSession
+    if (!$targetSystemPrivilegesObject) {
+        return $false
+    }
+
+    # 5. Loop through roles of source instance, determine sysprivs of each role, and apply sysprivs to role in target instance:
+    Foreach ($sourceRole in $sourceRolesObject | where-object { [string]::IsNullOrEmpty($_.hasSystemPrivileges) })
+    {
+        # Get list of sysprivs of role in source instance:
+        $sourceRoleSystemPrivilegeObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/usermanagement/roles/$($sourceRole.id)/privileges" $srcWebSession
+
+        if ($sourceRoleSystemPrivilegeObject) {
+            # Loop through system privileges of role in source instance:
+            Foreach ($sourceRoleSystemPrivilege in $sourceRoleSystemPrivilegeObject) 
+            {
+                # Get corresponding role in target instance:
+                $targetRole = $targetRolesObject | where-object { $_.rolename -eq $($sourceRole.rolename)}
+
+                if ($targetRole) {
+                    # Get corresponding syspriv id in target instance:
+                    $targetSyspriv = $targetSystemPrivilegesObject | where-object { $_.privilegeRightName -eq $($sourceRoleSystemPrivilege.privilegeRightName)}
+
+                    if ($targetSyspriv) {
+                        # Geant system privilege to role in target instance:
+                        # curl -X PUT --header 'Content-Type: text/plain' --header 'Accept: text/plain' -d '115' 'http://10.189.0.137:8080/njams/api/usermanagement/roles/5276/privilege'
+
+                        write-host "Grant system privilege '$($targetSyspriv.privilegeRightName)' for role '$($targetRole.rolename)' in target instance"
+                        fnCallRestApi "PUT" $reqHeader "text/plain" $($targetSyspriv.id) "$tgtInstance/api/usermanagement/roles/$($targetRole.id)/privilege" $tgtWebSession
+                    }
+                }
+            }
+        }
+    }
+
+    return $true
+}
 
 # (1) Login:
 # (1.a) Login into source instance:
@@ -1140,14 +1206,14 @@ if ($sourceUserId -and $targetUserId) {
 
     # Transfer object privileges:
     try {
-        if ($privs -or $transferAll) {
+        if ($objectPrivilege -or $transferAll) {
 
             # Get all roles from target instance. 
             # Store result in variable "$targetRolesBasicObject", which is of local scope of this script for usage in fnSetDomainObjectPriv
             $targetRolesBasicObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$targetInstance/api/usermanagement/roles/basic" $targetSession
 
-            #$objectPath = ">fs_endurance>BankleitzahlenService>"
-            $objectPath = ">"
+            # Set "objectPath" to value of argument "objectPrivilege":
+            $objectPath = $domainObjectPath
 
             # Get domain object(s) from source instance:
             if ($objectPath -eq ">") {
@@ -1164,7 +1230,6 @@ if ($sourceUserId -and $targetUserId) {
                 $result = fnTransferDomainObjectPrivs $sourceInstance $sourceSession $targetInstance $targetSession $objectPath $overwrite
             }
 
-
             if ($result) {
                 write-host "Transferring object privileges finished."
             }
@@ -1176,4 +1241,24 @@ if ($sourceUserId -and $targetUserId) {
     
         Exit
     }
+
+    # Transfer system privileges:
+    try {
+        if ($systemPrivilege -or $transferAll) {
+
+            $result = fnTransferSystemPrivs $sourceInstance $sourceSession $targetInstance $targetSession
+
+            if ($result) {
+                write-host "Transferring system privileges finished."
+            }
+        }
+    }
+    catch {
+        write-host "Unable to transfer system privileges due to:" -ForegroundColor Red
+        write-host "$_.Exception.Message"
+    
+        Exit
+    }
+
+
 }
