@@ -12,6 +12,8 @@
     * mail - settings of a smtp server
     * argos - settings of Argos configuration
     * user - user accounts and roles including assignments
+    * objectPrivilege - domain object permissions for roles
+    * systemPrivilege - system privileges for roles
     
     If you do not specify a particular configuration, all configurations are transferred to the target nJAMS instance.
     The script outputs the transferred configurations.
@@ -31,7 +33,7 @@
     Characteristics:
     - transfers all or particular configurations from a source instance to a target instance
     - supports nJAMS Server instances 4.4, 5.0, and 5.1 using HTTP or TLS/HTTPS
-    - script runs on Linux and macOS using PowerShell 7 or on Windows using Windows PowerShell 5 or PoweShell 7
+    - script runs on Linux and macOS using PowerShell 7 or on Windows using Windows PowerShell 5 or PowerShell 7
 
     Preparation:
     - Source and target nJAMS instances must be up and running
@@ -82,8 +84,19 @@
     Switch to enable transfer of Argos configuration.
     
 .PARAMETER user
-    Switch to enable transfer of user accounts and roles as well as their assignments. All users and roles are transferred, including synced LDAP users/roles.
-    
+    Switch to enable transfer of user accounts and roles as well as user/role assignments. Only local users and roles are transferred, synced users/roles from external system (e.g. LDAP) are not transferred.
+
+.PARAMETER objectPrivilege
+    Switch to enable transfer of domain object privileges for roles. Permissions for all domain objects will be transferred by default. Use parameters -domainObjectPath and/or -roleName in addition to limit transfer permissions only for a particular domain object path and/or for a particular role.
+
+.PARAMETER systemPrivilege
+    Switch to enable transfer of system privileges for roles. Use parameter -roleName in addition to limit transfer system privileges only for a particular role.
+
+.PARAMETER domainObjectPath
+    Specifies the domain object path, e.g. ">domain>deployment>engine>". Used in connection with parameter -objectPrivilege to limit transfer of domain object privileges only for a particular domain object path and its subordinate domain objects. 
+
+.PARAMETER roleName
+    Specifies the name of a role, e.g. "avengers". Used in connection with parameter -objectPrivileges and -systemPrivileges to limit transfer of system privileges only for a particular role.
 
 .EXAMPLE
     ./transferInstanceConfig.ps1 -sourceInstance "http://source_machine:8080/njams" -targetInstance "http://target_machine:8080/njams"
@@ -105,15 +118,27 @@
     ./transferInstanceConfig.ps1 -sourceInstance "http://source_machine:8080/njams" -targetInstance "http://target_machine:8080/njams" -ldap -force
     Transfers LDAP configuration without prompting for confirmation.
 
+.EXAMPLE
+    ./transferInstanceConfig.ps1 -sourceInstance "http://source_machine:8080/njams" -targetInstance "http://target_machine:8080/njams" -objectPrivilege
+    Transfers object privileges for all roles and all domain objects including all subordinate domain objects.
+
+.EXAMPLE
+    ./transferInstanceConfig.ps1 -sourceInstance "http://source_machine:8080/njams" -targetInstance "http://target_machine:8080/njams" -objectPrivilege -domainObjectPath ">domain>"
+    Transfers object privileges for domain object "domain" including all subordinate domain objects.
+
+.EXAMPLE
+    ./transferInstanceConfig.ps1 -sourceInstance "http://source_machine:8080/njams" -targetInstance "http://target_machine:8080/njams" -objectPrivilege -domainObjectPath ">domain>" -roleName "avengers"
+    Transfers object privileges for role "avengers" and domain object "domain" including all subordinate domain objects.
+
 .LINK
     https://github.com/integrationmatters/njams-toolbox
     https://www.integrationmatters.com/
 
 .NOTES
-    Version:    0.9.1
+    Version:    1.0.1
     Copyright:  (c) Integration Matters
     Author:     Stephan Holters
-    Date:       September 2020
+    Date:       October 2020
 #>
 
 param (
@@ -134,7 +159,8 @@ param (
     [switch]$argos,
     [switch]$user,
     [switch]$objectPrivilege,
-    [Alias("path")]$domainObjectPath = ">",
+    [Alias("path")][string]$domainObjectPath = ">",
+    [Alias("role")][string]$roleName,
     [switch]$systemPrivilege,
     # general transfer options:
     [switch]$overwrite,
@@ -684,7 +710,6 @@ function fnTransferUsersRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtW
                     # Else print error and exit script.
                     else {
                         write-host "Error calling nJAMS Rest/API due to:" -ForegroundColor Red
-                        write-host "fnCallRestApi PUT $reqHeader text/plain $($tgtUser.id) $tgtInstance/api/usermanagement/roles/$($tgtRole.id)/user $tgtWebSession" -ForegroundColor Red
                         write-host "$_.Exception.Message"
 
                         Exit
@@ -736,8 +761,11 @@ function fnGetDomainObjectListByPath ($instance, $webSession, $objectPath) {
     # Get list of sub domain objects by path from given instance:
 
     try {
+        # Encode objectPath:
+        $encodedObjectPath = [System.Web.HttpUtility]::UrlEncode($objectPath)
+
         # Get list of domain objects:
-        $domainObjectList = fnCallRestApi "GET" $reqHeader "application/json" $null "$instance/api/domainobject/path/$objectPath" $webSession
+        $domainObjectList = fnCallRestApi "GET" $reqHeader "application/json" $null "$instance/api/domainobject/path/$encodedObjectPath" $webSession
     }
     catch {
         if ($PSVersionTable.PSEdition -eq "Core") {
@@ -828,10 +856,9 @@ function fnTransferDomainObjectPrivs ($srcInstance, $srcWebSession, $tgtInstance
 
                 # Set privileges for role on domain object in target instance:
                 $examineNextLevel = fnSetDomainObjectPrivs $srcInstance $srcWebSession $tgtInstance $tgtWebSession $($sourceDO.id) $($targetDomainObject.id)
-            
-                # In case we encounter privilege UNDETERMINED, the domain object level below has to be examined too:
-                if ($examineNextLevel) {
 
+                # In case we encounter privilege UNDETERMINED, the domain object level below has to be examined too:
+                if ($examineNextLevel -eq $true) {
                     # Get sub elements of object path in source instance:
                     $sourceDomainObjectList = fnGetDomainObjectListByPath $srcInstance $srcWebSession $objectPath
 
@@ -858,8 +885,13 @@ function fnSetDomainObjectPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tg
     # Get object privileges from domain object of source instance:
     $sourceDOPrivilegeObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/usermanagement/objects/all/DO/$srcDomainObjectId" $srcWebSession
 
-        # Initialize required examination of next level of domain object below:
-        $examineNextLevel = $false
+    # If applicable, filter domain privilege object of source instance by specified role:
+    if ($roleName) {
+        $sourceDOPrivilegeObject = $sourceDOPrivilegeObject | where-object { $_.rolename -match $roleName }
+    }
+
+    # Initialize required examination of next level of domain object below:
+    $examineNextLevel = $false
 
     # Loop through permissions granted to roles for domain object of source instance:
     Foreach ($sourceDOPriv in $sourceDOPrivilegeObject) 
@@ -868,7 +900,7 @@ function fnSetDomainObjectPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tg
         $targetRole = $targetRolesBasicObject | where-object { $_.rolename -eq $($sourceDOPriv.rolename) }
 
         # Continue, if role in target instance has not Admin system privilege:
-        if (!$targetRole.admin) {
+        if (!$($targetRole.admin)) {
 
             # Continue looping, if role exists in target instance:
             if ($targetRole) {
@@ -886,21 +918,49 @@ function fnSetDomainObjectPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tg
                             {
                                 # write-host $sourcePriv.$($privName)
                                 # Grant permission on domain object for role in target instance:
-                                if ($sourcePriv.$($privName) -eq "GRANTED") {
-                                    
-                                    $targetResult = fnCallRestApi "PUT" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/objects/$($targetRole.id)/DO/$tgtDomainObjectId/$sourceCategoryName/$privName" $tgtWebSession
-                                    # write-host "GRANT " "category: " $sourceCategoryName " " srcDoId: " $($sourceDOPriv.objectId) " tgtDoId: " $tgtDomainObjectId " tgtRole: " $($targetRole.id) " " $($targetRole.roleName) priv: " $privName " " $sourcePriv.$($privName)
-                                    write-host "Grant privilege '$privName' on role '$($targetRole.roleName)' for '$($sourceDOPriv.path)'."
-                                }
+                                try {
+                                    if ($sourcePriv.$($privName) -eq "GRANTED") {
+                                        
+                                        fnCallRestApi "PUT" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/objects/$($targetRole.id)/DO/$tgtDomainObjectId/$sourceCategoryName/$privName" $tgtWebSession
 
-                                # Revoke permission on domain object for role in target instance:
-                                if ($sourcePriv.$($privName) -eq "NOT_GRANTED") {
-                                    
-                                    $targetResult = fnCallRestApi "DELETE" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/objects/$($targetRole.id)/DO/$tgtDomainObjectId/$sourceCategoryName/$privName" $tgtWebSession
-                                    # write-host "REVOKE " "category: " $sourceCategoryName " " srcDoId: " $($sourceDOPriv.objectId) " tgtDoId: " $tgtDomainObjectId " tgtRole: " $($targetRole.id) " " $($targetRole.roleName) priv: " $privName " " $sourcePriv.$($privName)
-                                    write-host "Revoke privilege '$privName' on role '$($targetRole.roleName)' for '$($sourceDOPriv.path)'."
-                                }
+                                        write-host "Granted privilege '$privName' on role '$($targetRole.roleName)' for '$($sourceDOPriv.path)'."
+                                    }
 
+                                    # Revoke permission on domain object for role in target instance:
+                                    if ($sourcePriv.$($privName) -eq "NOT_GRANTED") {
+                                        
+                                        fnCallRestApi "DELETE" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/objects/$($targetRole.id)/DO/$tgtDomainObjectId/$sourceCategoryName/$privName" $tgtWebSession
+
+                                        write-host "Revoked privilege '$privName' on role '$($targetRole.roleName)' for '$($sourceDOPriv.path)'."
+                                    }
+                                }
+                                catch {
+                                    if ($PSVersionTable.PSEdition -eq "Core") {
+                                        $parsedError = $_.ErrorDetails.Message | ConvertFrom-Json
+                                    }
+                                    else {
+                                        $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                                        $reader.BaseStream.Position = 0
+                                        $reader.DiscardBufferedData()
+                                        $parsedError = $reader.ReadToEnd() | ConvertFrom-Json
+                                    }
+                
+                                    # If role is admin, continue silently:
+                                    if ($($parsedError.errorCode) -eq "00152") {
+                
+                                        write-host $($parsedError.message)
+                                        Continue
+                                    }
+                                    # Else print error and exit script.
+                                    else {
+                                        write-host "Error calling nJAMS Rest/API due to:" -ForegroundColor Red
+                                        write-host "Granting privilege '$privName' on role '$($targetRole.roleName)' for '$($sourceDOPriv.path)' failed." -ForegroundColor Red
+                                        write-host "$_.Exception.Message"
+                
+                                        Exit
+                                    }
+                                }
+                
                                 # If privilege is UNDETERMINED, the next level below this domain object has to be examined for transferring permissions:
                                 if ($sourcePriv.$($privName) -eq "UNDETERMINED") {
                                     $examineNextLevel = $true
@@ -930,10 +990,20 @@ function fnTransferSystemPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tgt
         return $false
     }
 
+    # If applicable, filter roles object of source instance by specified role:
+    if ($roleName) {
+        $sourceRolesObject = $sourceRolesObject | where-object { $_.rolename -match $roleName }
+    }
+
     # 2. Get all roles of target instance:
     $targetRolesObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/roles" $tgtWebSession
     if (!$targetRolesObject) {
         return $false
+    }
+
+    # If applicable, filter roles object of target instance by specified role:
+    if ($roleName) {
+        $targetRolesObject = $targetRolesObject | where-object { $_.rolename -match $roleName }
     }
 
     # 3. Get all available system privileges of source instance:
