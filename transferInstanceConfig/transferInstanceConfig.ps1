@@ -992,7 +992,7 @@ function fnTransferSystemPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tgt
 
     # If applicable, filter roles object of source instance by specified role:
     if ($roleName) {
-        $sourceRolesObject = $sourceRolesObject | where-object { $_.rolename -match $roleName }
+        $sourceRolesObject = $sourceRolesObject | where-object { $_.rolename -eq $roleName }
     }
 
     # 2. Get all roles of target instance:
@@ -1003,7 +1003,7 @@ function fnTransferSystemPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tgt
 
     # If applicable, filter roles object of target instance by specified role:
     if ($roleName) {
-        $targetRolesObject = $targetRolesObject | where-object { $_.rolename -match $roleName }
+        $targetRolesObject = $targetRolesObject | where-object { $_.rolename -eq $roleName }
     }
 
     # 3. Get all available system privileges of source instance:
