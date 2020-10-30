@@ -21,7 +21,9 @@ First the script exports the nJAMS H2 database file ("njams.mv.db") into a tempo
   4. Copy H2 JDBC driver jar file from `<njams-installation>/wildfly16/modules/system/layers/base/com/h2database/h2/main/` of your nJAMS Server machine to the working folder.
   5. Open Windows Command Prompt and CD to the working folder.
   6. Run the script. If applicable, enter the credentials to access nJAMS H2 database by specifying username and password.
-      -> The new nJAMS H2 database is created in subfolder `target` of your working folder. You will notice, the new file is significantly smaller than the original file.
+
+  -> The new nJAMS H2 database is created in subfolder `target` of your working folder. You will notice, the new file is significantly smaller than the original file.
+  
   8. Replace the original nJAMS H2 database file on nJAMS Server machine with the newly created H2 database file.
 
 ## Characteristics:
@@ -34,10 +36,10 @@ First the script exports the nJAMS H2 database file ("njams.mv.db") into a tempo
 
 ```
 SYNTAX
-    .\h2-maintenance.cmd db-user password [db-name]
+    h2-maintenance.cmd db-user password [db-name]
 ```
 
-Run `.\h2-maintenance.cmd -?` to learn more about how to use the script. 
+Run `h2-maintenance.cmd -?` to learn more about how to use the script. 
 
 ## Execution:
 
@@ -46,7 +48,7 @@ Run `.\h2-maintenance.cmd -?` to learn more about how to use the script.
   Run Windows Command Prompt and enter command, for example:
 
   ```
-  C:\> .\h2-maintenance.cmd admin admin
+  C:\temp\working> h2-maintenance.cmd admin admin
   ```
 
 ## Prerequisites:

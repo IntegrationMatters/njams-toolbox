@@ -13,7 +13,7 @@ We provide h2-maintenance scripts for Windows, Linux, or Mac.
 
 ## How it works:
 
-First the script exports the nJAMS H2 database file ("njams.mv.db") into a temporary ZIP file. Secondly a new H2 database file is created based on the export. For more details see the description of the script in bash, cmd, or ps1.
+First the script exports the nJAMS H2 database file `njams.mv.db` into a temporary ZIP file. Secondly a new H2 database file is created based on the export. For more details see the description of the individual script in bash, cmd, or ps1.
 
 
 ## Characteristics:

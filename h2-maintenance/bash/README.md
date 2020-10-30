@@ -43,7 +43,7 @@ Run `./h2-maintenance.sh -?` to learn more about how to use the script.
 
 * Linux/Unix:
 
-  Run a terminal and enter command, for example:
+  Open a Terminal and enter command, for example:
 
   ```
   $ ./h2-maintenance.sh admin admin
