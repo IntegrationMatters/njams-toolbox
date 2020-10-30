@@ -1,5 +1,5 @@
 # nJAMS toolbox
-This repository contains tools that can help you with the daily use of nJAMS. Let us know if you have any issues using them, there is always space for improvement. Feel free to fork.
+This repository contains tools that can help you with the daily use of nJAMS. Let us know if you have any issues using them or some other good ideas, there is always space for improvement. Feel free to fork.
 
 * **findDomainObjects**
 
@@ -10,7 +10,7 @@ This repository contains tools that can help you with the daily use of nJAMS. Le
   The internal "H2" database of nJAMS Server is a lightweight, efficient and low maintenance relational database management system (RDBMS).
   However, from time to time it may be required to compact H2 database file. Especially when nJAMS Server is running continously over weeks or months, the H2 database file may increase significantly. The H2 database is automatically compacted, when closing the database. In order to close and compact H2 database, nJAMS Server must be stopped and restarted.
 
-  This maintenance script goes beyond and rebuilds the H2 database. Rebuilding the database will further reduce the database size, since it will also rebuild the indexes.
+  This maintenance script goes beyond and rebuilds the H2 database. Rebuilding the database will lead to even smaller database size and overall better performance of the database.
 
 * **setLogLevel**
 
