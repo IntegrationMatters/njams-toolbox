@@ -202,7 +202,8 @@ try {
         }
         else {
 
-            write-host "No JDBC driver file found. Please specify path to nJAMS installation directory or copy JDBC driver file 'h2-*.jar' manually into working directory." -ForegroundColor Yellow
+            write-host "No JDBC driver file found. Please specify path to nJAMS installation directory or manually copy JDBC driver file from your nJAMS installation into working directory." -ForegroundColor Yellow
+            write-host "Please note: do not use a different version of the JDBC driver, the database file can be corrupted otherwise." -ForegroundColor Yellow
 
             Exit
         }
