@@ -1,5 +1,5 @@
 # h2-maintenance
-Rebuilds H2 database of an nJAMS Server instance.
+Rebuilds H2 database of nJAMS Server instance.
 
 ## Description:
 

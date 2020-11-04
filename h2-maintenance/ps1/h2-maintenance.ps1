@@ -124,7 +124,7 @@ if (!$force) {
 # If specified working folder does not exist, exit script.
 if (-Not (Test-Path $workingDir)) {
 
-    write-host ("Specified working directory '$workingDir' does not exist. Script exits.")
+    write-host ("Specified working directory '$workingDir' does not exist. Script exits.") -ForegroundColor Yellow
 
     Exit
 }
@@ -133,6 +133,7 @@ if (-Not (Test-Path $workingDir)) {
 # If '-njamsDir' is specified, copy database file from nJAMS installation folder of this machine.
 # If '-njamsDir' is NOT specified and database file does NOT exist in working folder, exit script.
 $h2DBFile = $dbName + ".mv.db"
+$h2LockFile = $dbName + ".lock.db"
 $h2DBPath = "data/h2/"
 $workingH2DBFullPath = $workingDir + $h2DBFile
 try {
@@ -152,11 +153,22 @@ try {
         $sourceH2DBFullPath = $njamsDir + $h2DBPath + $h2DBFile
         if (Test-Path $sourceH2DBFullPath -PathType leaf) {
 
-            write-host "H2 database file '$h2DBFile' will be copied from nJAMS installation directory into working directory..."
+            # Check for db lock file. 
+            # In case lock file is present, the H2 database is in use and the script has to exit.
+            $sourceH2LockFullPath = $njamsDir + $h2DBPath + $h2LockFile
+            if (Test-Path $sourceH2LockFullPath -PathType leaf) {
 
-            Copy-Item -path $sourceH2DBFullPath $workingDir -ErrorAction Stop
+                write-host "H2 database is in use and cannot be rebuilt. Please shutdown nJAMS Server instance before using h2-maintenance script." -ForegroundColor Yellow
 
-            write-host "H2 database file copied."
+                Exit
+            }
+            else {
+                write-host "H2 database file '$h2DBFile' will be copied from nJAMS installation directory into working directory..."
+
+                Copy-Item -path $sourceH2DBFullPath $workingDir -ErrorAction Stop
+
+                write-host "H2 database file copied."
+            }
         }
         else {
             write-host "No H2 database file found. Please correct path to nJAMS installation directory." -ForegroundColor Yellow
@@ -247,10 +259,13 @@ catch {
 
 # (5) Check Java version:
 try {
-    $javaVersion = Get-Command java | Select-Object -ExpandProperty Version
-    if ($javaVersion.Major -lt "8") {
 
-        write-host "You are using Java $($javaVersion.Major). Please use Java version 8 or higher." -ForegroundColor Yellow
+    # Try to check Java version:
+    $result = java -version
+
+    if ($result) {
+
+        write-host "Java is not running properly, please make sure Java is installed correctly." -ForegroundColor Yellow
 
         Exit
     }
@@ -332,7 +347,7 @@ try {
 
         write-host "Replacing H2 database file at '$workingH2DBFullPath' with rebuilt database file..."
 
-        Move-Item -path $($workingTargetPath + $h2DBFile) -destination $sourceH2DBFullPath -ErrorAction Stop
+        Move-Item -path $($workingTargetPath + $h2DBFile) -destination $sourceH2DBFullPath -force -ErrorAction Stop
 
         write-host "Finished."
         write-host "The H2 datbase has been rebuilt and replaced at nJAMS installation directory. You can now start nJAMS Server again."
