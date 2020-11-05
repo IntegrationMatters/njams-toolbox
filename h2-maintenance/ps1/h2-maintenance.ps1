@@ -16,22 +16,22 @@
     There are basically two options to use the script.
     (a) Manual approach:
     1. Copy the script to a working folder of any Windows, Linux or Mac machine that has sufficient free disk space and has installed Java 8 or higher.
-    2. Shutdown nJAMS Server.
+    2. Stop nJAMS Server instance, respectively shutdown WildFly process.
     3. Copy "njams.mv.db" from "<njams-installation>/data/h2/" of your nJAMS Server machine to the working folder of this machine.
     4. Copy H2 JDBC driver jar file from "<njams-installation>/wildfly16/modules/system/layers/base/com/h2database/h2/main/" of your nJAMS Server machine to the working folder.
     5. Open Powershell and CD to the working folder.
     6. Run the script. If applicable, enter the credentials to access nJAMS H2 database by specifying parameters -dbUser and -password.
        -> The new nJAMS H2 database is created in subfolder "target" of your working folder. You will notice, the new file is significantly smaller than the original file.
     8. Replace the original nJAMS H2 database file on nJAMS Server machine with the newly created H2 database file.
-    9. Restart nJAMS Server.
+    9. Restart nJAMS Server by starting WildFly again.
 
     (b) Automatic approach:
     1. Copy the script to a working folder of your nJAMS Server machine. Make sure this machine has sufficient free disk space and has installed Java 8 or higher.
-    2. Shutdown nJAMS Server.
+    2. Stop nJAMS Server instance, respectively shutdown WildFly process.
     3. Open Powershell and CD to the working folder.
     4. Run the script. Specify credentials to H2 database and specify the path to your nJAMS installation, e,g, "/opt/njams/".
        -> The script copies H2 database file and JDBC driver file from nJAMS installation folder to working folder and replaces the original H2 database file with the newly created file. 
-    5. Restart nJAMS Server.
+    5. Restart nJAMS Server by starting WildFly again.
 
     Characteristics:
     - shrinks nJAMS H2 database by rebuilding H2 database file
@@ -98,13 +98,38 @@ $workingDir = ($workingDir -replace '[\\/]?[\\/]$') + '/'
 $consoleLog = 1
 $tempFile = "export.zip"
 
+# Function to determine, if a process is running. Works on Windows and Linux:
+function fnCheckRunningProcess ([string]$processName) {
+
+    if ($PSVersionTable.PSEdition -eq "Core") {
+        # Linux:
+        if ($IsLinux -or $IsMac) {
+            $result = ps -ef | grep "$processName"
+
+            if ($result -like "*/$($processName)*") { 
+
+                return $true
+            } 
+        }
+    }
+    # Windows:
+    $result = get-process -name "*$processName*"
+
+    if ($result) {
+
+        return $true
+    }
+
+    return $false
+}
+
 # Ask for confirmation to proceed:
 if (!$force) {
     if ($PSBoundParameters.ContainsKey('njamsDir')) {
         write-host "This script will rebuild the H2 database of your nJAMS instance."
         write-host "First the H2 database file and JDBC driver are copied from nJAMS installation directory ('$njamsDir') into working directory ('$workingDir')."
         write-host "After rebuilding the database, the original database file in nJAMS installation directory is replaced by the rebuilt database file." 
-        write-host "Make sure nJAMS Server is stopped and H2 database file is not locked." -ForegroundColor Yellow
+        write-host "Make sure your nJAMS Server (WildFly) is stopped and H2 database file is not locked." -ForegroundColor Yellow
     }
     else {
         write-host "This script will rebuild the H2 database file in working directory ('$workingDir')." 
@@ -153,15 +178,13 @@ try {
         $sourceH2DBFullPath = $njamsDir + $h2DBPath + $h2DBFile
         if (Test-Path $sourceH2DBFullPath -PathType leaf) {
 
-            # Check for db lock file. 
-            # In case lock file is present, the H2 database is in use and the script has to exit.
-            $sourceH2LockFullPath = $njamsDir + $h2DBPath + $h2LockFile
-            if (Test-Path $sourceH2LockFullPath -PathType leaf) {
+            # If wildfly process is still running, exit script:
+            if (fnCheckRunningProcess("wildfly")) { 
 
-                write-host "H2 database is in use and cannot be rebuilt. Please shutdown nJAMS Server instance before using h2-maintenance script." -ForegroundColor Yellow
+                write-host "H2 database is in use and cannot be rebuilt. Please shutdown WildFly process of your nJAMS Server instance before using h2-maintenance script." -ForegroundColor Yellow
 
                 Exit
-            }
+            } 
             else {
                 write-host "H2 database file '$h2DBFile' will be copied from nJAMS installation directory into working directory..."
 
