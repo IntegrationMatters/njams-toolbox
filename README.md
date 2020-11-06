@@ -1,5 +1,5 @@
 # nJAMS toolbox
-This repository contains tools that can help you with the daily use of nJAMS. Let us know if you have any issues using them or some other good ideas, there is always space for improvement. Feel free to fork.
+This repository contains tools that can help you with the daily use of nJAMS. Let us know if you have any issues using them or you have some other good ideas, there is always space for improvement.
 
 * **findDomainObjects**
 

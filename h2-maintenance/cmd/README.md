@@ -20,7 +20,7 @@ First the script exports the nJAMS H2 database file `njams.mv.db` into a tempora
 
 ## Characteristics:
 
-* shrinks nJAMS H2 database by rebuilding H2 database file
+* reorganizes nJAMS H2 database by rebuilding H2 database file
 * supports H2 database files of nJAMS Server 5.x
 * runs on Windows using Windows Command Prompt
 
@@ -47,6 +47,6 @@ Run `h2-maintenance.cmd -?` to learn more about how to use the script.
 
 * General requirements:
 
-  - Java 8 or higher is required
+  - Java is required
   - Make sure there is enough disk space available on the machine, where you execute the script. 
   - You need read/write permission on working directory

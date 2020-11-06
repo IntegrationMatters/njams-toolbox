@@ -32,7 +32,7 @@ There are basically two options to use the script.
 
 ## Characteristics:
 
-* shrinks nJAMS H2 database by rebuilding H2 database file
+* reorganizes nJAMS H2 database by rebuilding H2 database file
 * supports H2 database files of nJAMS Server 5.x
 * runs on Windows, Linux, and macOS using PowerShell Core 7 or Windows PowerShell 5
 
@@ -82,7 +82,7 @@ Run `help ./h2-maintenance.ps1 -examples` to learn from some common examples.
 
 * General requirements:
 
-  - Java 8 or higher is required
+  - Java is required
   - Make sure there is enough disk space available on the machine, where you execute the script. 
   - You need read/write permission on working directory
   - If applicable, you need read/write permission on nJAMS installation directory

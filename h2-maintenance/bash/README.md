@@ -20,7 +20,7 @@ First the script exports the nJAMS H2 database file `njams.mv.db` into a tempora
 
 ## Characteristics:
 
-* shrinks nJAMS H2 database by rebuilding H2 database file
+* reorganizes nJAMS H2 database by rebuilding H2 database file
 * supports H2 database files of nJAMS Server 5.x
 * runs on Linux/Unix using bash
 

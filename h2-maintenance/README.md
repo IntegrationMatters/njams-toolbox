@@ -13,18 +13,18 @@ We provide h2-maintenance scripts for Windows, Linux, or Mac.
 
 ## How it works:
 
-First the script exports the nJAMS H2 database file `njams.mv.db` into a temporary ZIP file. Secondly a new H2 database file is created based on the export. For more details see the description of the individual script in bash, cmd, or ps1.
+First the script exports the nJAMS H2 database file `njams.mv.db` into a temporary ZIP file. Secondly a new H2 database file is created based on the exported file. For more details see the description of the individual script in bash, cmd, or ps1.
 
 
 ## Characteristics:
 
-* shrinks nJAMS H2 database by rebuilding H2 database file
+* reorganizes nJAMS H2 database by rebuilding H2 database file
 * supports H2 database files of nJAMS Server 5.x
 
 
 ## Requirements:
 
-  - Java 8 or higher is required
+  - Java is required
   - Make sure there is enough disk space available on the machine, where you execute the script. 
   - You need read/write permission on working directory
   - If applicable, you need read/write permission on nJAMS installation directory
