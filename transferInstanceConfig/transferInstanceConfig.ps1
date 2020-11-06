@@ -143,11 +143,11 @@
 
 param (
     # Source instance:
-    [Parameter(Mandatory=$true)][string]$sourceInstance = "http://os0137:8080/njams",
+    [Parameter(Mandatory = $true)][string]$sourceInstance = "http://os0137:8080/njams",
     [string]$sourceUsername = "admin",
     [string]$sourcePassword = "admin",
     # Target instance:
-    [Parameter(Mandatory=$true)][string]$targetInstance = "http://os0102:8080/njams",
+    [Parameter(Mandatory = $true)][string]$targetInstance = "http://os0102:8080/njams",
     [string]$targetUsername = "admin",
     [string]$targetPassword = "admin",
     # Options:
@@ -165,7 +165,7 @@ param (
     # general transfer options:
     [switch]$overwrite,
     [switch]$force
-    )
+)
 
 # Check for configurations to transfer:
 $transferAll = $false
@@ -186,7 +186,7 @@ if ($PSBoundParameters.ContainsKey('config') -eq $false -and
 # Use -SkipCertificateCheck in "Invoke-RestMethod" instead, when you are on PScore.
 # For Windows PowerShell 5 use the following:
 if ($PSVersionTable.PSEdition -ne "Core") {
-Add-Type @"
+    Add-Type @"
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 public class TrustAllCertsPolicy : ICertificatePolicy {
@@ -197,14 +197,14 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
     }
 }
 "@
-[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-# Set Tls versions
-$allProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
-[System.Net.ServicePointManager]::SecurityProtocol = $allProtocols
+    [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+    # Set Tls versions
+    $allProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
+    [System.Net.ServicePointManager]::SecurityProtocol = $allProtocols
 }
 
 # General header for request:
-$reqHeader = @{"Authorization" = "Basic"+[System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes('"$username:$password"'))}
+$reqHeader = @{"Authorization" = "Basic" + [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes('"$username:$password"')) }
 
 # This function calls nJAMS Rest/API and returns result:
 function fnCallRestApi ($method, $requestHeader, $contentType, $requestBody, $uri, $session) {
@@ -242,8 +242,7 @@ function fnStopDataProviders ($tgtInstance, $tgtWebSession) {
     }
 
     # Loop through list of Data Providers:
-    Foreach ($dataProvider in $targetDataProviderObject | where-object { $_.state -eq "RUNNING" })
-    {
+    Foreach ($dataProvider in $targetDataProviderObject | where-object { $_.state -eq "RUNNING" }) {
         # Define target request body:
         $targetRequestBody = '{ "start": "false" }'
         
@@ -279,11 +278,10 @@ function fnTransferJNDIConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtW
     $targetJNDIConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/jndiconnection" $tgtWebSession
 
     # Loop through source configurations:
-    Foreach ($sourceConfig in $sourceJNDIConfigObject)
-    {
+    Foreach ($sourceConfig in $sourceJNDIConfigObject) {
         # Define target request body:
         $targetRequestObject = [PSCustomObject]@{
-            "name" = $($sourceConfig.name)
+            "name"       = $($sourceConfig.name)
             "properties" = $($sourceConfig.properties)
         }
 
@@ -341,18 +339,17 @@ function fnTransferJMSConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWe
     $targetJNDIConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/jndiconnection" $tgtWebSession
 
     # Loop through source configurations:
-    Foreach ($sourceConfig in $sourceJMSConfigObject)
-    {
+    Foreach ($sourceConfig in $sourceJMSConfigObject) {
         # Define target request body:
         $targetRequestObject = [PSCustomObject]@{
-            "name" = $($sourceConfig.name)
-            "provider" = $($sourceConfig.provider)
-            "username" = $($sourceConfig.username)
-            "password" = $($sourceConfig.password)
-            "destination" = $($sourceConfig.destination)
+            "name"          = $($sourceConfig.name)
+            "provider"      = $($sourceConfig.provider)
+            "username"      = $($sourceConfig.username)
+            "password"      = $($sourceConfig.password)
+            "destination"   = $($sourceConfig.destination)
             "responseQueue" = $($sourceConfig.responseQueue)
-            "monitoring" = $($sourceConfig.monitoring)
-            "useSsl" =  $($sourceConfig.useSsl)
+            "monitoring"    = $($sourceConfig.monitoring)
+            "useSsl"        = $($sourceConfig.useSsl)
         }
 
         # If there is a reference to JNDI connection:
@@ -374,15 +371,15 @@ function fnTransferJMSConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWe
 
         if ($($sourceConfig.useSsl) -eq "true") {
             $targetRequestObject | Add-Member -MemberType NoteProperty -Name "emsSslConnectionConfig" -Value @{
-                "sslTrace" = $($sourceConfig.emsSslConnectionConfig.sslTrace)
-                "sslDebugTrace" = $($sourceConfig.emsSslConnectionConfig.sslDebugTrace)
+                "sslTrace"            = $($sourceConfig.emsSslConnectionConfig.sslTrace)
+                "sslDebugTrace"       = $($sourceConfig.emsSslConnectionConfig.sslDebugTrace)
                 "trustedCertificates" = $($sourceConfig.emsSslConnectionConfig.trustedCertificates)
-                "expectedHostname" = $($sourceConfig.emsSslConnectionConfig.expectedHostname)
-                "publicKey" = $($sourceConfig.emsSslConnectionConfig.publicKey)
-                "privateKey" = $($sourceConfig.emsSslConnectionConfig.privateKey)
-                "privateKeyPassword" = $($sourceConfig.emsSslConnectionConfig.privateKeyPassword)
-                "sslVendor" = $($sourceConfig.emsSslConnectionConfig.sslVendor)
-                "sslCiphers" = $($sourceConfig.emsSslConnectionConfig.sslCiphers)
+                "expectedHostname"    = $($sourceConfig.emsSslConnectionConfig.expectedHostname)
+                "publicKey"           = $($sourceConfig.emsSslConnectionConfig.publicKey)
+                "privateKey"          = $($sourceConfig.emsSslConnectionConfig.privateKey)
+                "privateKeyPassword"  = $($sourceConfig.emsSslConnectionConfig.privateKeyPassword)
+                "sslVendor"           = $($sourceConfig.emsSslConnectionConfig.sslVendor)
+                "sslCiphers"          = $($sourceConfig.emsSslConnectionConfig.sslCiphers)
             }
         }
 
@@ -440,8 +437,7 @@ function fnTransferDPConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWeb
     $targetJMSConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/jmsconnection" $tgtWebSession
 
     # Loop through source configurations:
-    Foreach ($sourceConfig in $sourceDPConfigObject)
-    {
+    Foreach ($sourceConfig in $sourceDPConfigObject) {
         # Take source JMS config id and get JMS config name. Take this name to request JMS config id from target:
         $jmsSourceConfig = $srcJMSConfigObject | where-object { $_.id -eq $($sourceConfig.jmsConnectionConfig.id) }
         $jmsSourceName = $($jmsSourceConfig.name)
@@ -450,11 +446,11 @@ function fnTransferDPConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWeb
 
         # Define target request body:
         $targetRequestObject = [PSCustomObject]@{
-            "name" = $($sourceConfig.name)
-            "threadCount" = $($sourceConfig.threadCount)
-            "startup" = $($sourceConfig.startup)
+            "name"             = $($sourceConfig.name)
+            "threadCount"      = $($sourceConfig.threadCount)
+            "startup"          = $($sourceConfig.startup)
             "dataProviderType" = $($sourceConfig.dataProviderType)
-            "jmsConnection" = $jmsTargetId
+            "jmsConnection"    = $jmsTargetId
         }
 
         # Convert custom object to JSON:
@@ -533,17 +529,16 @@ function fnTransferRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSes
     $targetRolesObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/roles" $tgtWebSession
 
     # Loop through source configurations:
-    Foreach ($sourceConfig in $sourceRolesObject | where-object { [string]::IsNullOrEmpty($_.externalSystem) })
-    {
+    Foreach ($sourceConfig in $sourceRolesObject | where-object { [string]::IsNullOrEmpty($_.externalSystem) }) {
         # Define target request body:
         $targetRequestObject = [PSCustomObject]@{
-            "rolename" = $($sourceConfig.rolename)
-            "comment" = $($sourceConfig.comment)
-            "userRole" = $($sourceConfig.userRole)
-            "externalSystem" = $($sourceConfig.externalSystem)
-            "externalId" = $($sourceConfig.externalId)
+            "rolename"            = $($sourceConfig.rolename)
+            "comment"             = $($sourceConfig.comment)
+            "userRole"            = $($sourceConfig.userRole)
+            "externalSystem"      = $($sourceConfig.externalSystem)
+            "externalId"          = $($sourceConfig.externalId)
             "hasSystemPrivileges" = $($sourceConfig.hasSystemPrivileges)
-            "propertyMap" = $($sourceConfig.propertyMap)
+            "propertyMap"         = $($sourceConfig.propertyMap)
         }
 
         # Convert custom object to JSON:
@@ -597,21 +592,20 @@ function fnTransferUsers ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSes
     $targetUsersObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/users" $tgtWebSession
 
     # Loop through source configurations:
-    Foreach ($sourceConfig in $sourceUsersObject | where-object { [string]::IsNullOrEmpty($_.externalSystem) })
-    {
+    Foreach ($sourceConfig in $sourceUsersObject | where-object { [string]::IsNullOrEmpty($_.externalSystem) }) {
         # Define target request body:
         $targetRequestObject = [PSCustomObject]@{
-            "username" = $($sourceConfig.username)
-            "firstname" = $($sourceConfig.firstname)
-            "lastname" = $($sourceConfig.lastname)
-            "email" = $($sourceConfig.email)
-            "comment" = $($sourceConfig.comment)
-            "validFrom" = $($sourceConfig.validFrom)
-            "validTo" = $($sourceConfig.validTo)
+            "username"       = $($sourceConfig.username)
+            "firstname"      = $($sourceConfig.firstname)
+            "lastname"       = $($sourceConfig.lastname)
+            "email"          = $($sourceConfig.email)
+            "comment"        = $($sourceConfig.comment)
+            "validFrom"      = $($sourceConfig.validFrom)
+            "validTo"        = $($sourceConfig.validTo)
             "externalSystem" = $($sourceConfig.externalSystem)
-            "externalId" = $($sourceConfig.externalId)
+            "externalId"     = $($sourceConfig.externalId)
             #"propertyMap" = $($sourceConfig.propertyMap)
-            }
+        }
 
         # Convert custom object to JSON:
         $targetRequestBody = $targetRequestObject | ConvertTo-Json
@@ -665,8 +659,7 @@ function fnTransferUsersRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtW
     $targetUsersObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$tgtInstance/api/usermanagement/users" $tgtWebSession
 
     # Loop through roles of source instance that do not come from external system:
-    Foreach ($srcRole in $srcRolesObject | where-object { [string]::IsNullOrEmpty($_.externalSystem) })
-    {
+    Foreach ($srcRole in $srcRolesObject | where-object { [string]::IsNullOrEmpty($_.externalSystem) }) {
         # Get matching role from target instance:
         $tgtRole = $targetRolesObject | where-object { $_.rolename -eq $($srcRole.rolename) }
 
@@ -675,17 +668,16 @@ function fnTransferUsersRoles ($srcInstance, $srcWebSession, $tgtInstance, $tgtW
 
         if ($sourceUsersObject) {
             # Loop through users of this role in source instance:
-            Foreach ($srcUser in $sourceUsersObject)
-            {
+            Foreach ($srcUser in $sourceUsersObject) {
                 # Get matching user from target instance:
                 $tgtUser = $targetUsersObject | where-object { $_.username -eq $($srcUser.username) }
 
                 # Add user to role in target instance:
                 try {
-                    $targetResult = $null
+                    #$targetResult = $null
                     # If there is a matching user in target instance, add user to role in target instance:
                     if ($tgtUser) {
-                        $targetResult = fnCallRestApi "PUT" $reqHeader "text/plain" $($tgtUser.id) "$tgtInstance/api/usermanagement/roles/$($tgtRole.id)/user" $tgtWebSession
+                        fnCallRestApi "PUT" $reqHeader "text/plain" $($tgtUser.id) "$tgtInstance/api/usermanagement/roles/$($tgtRole.id)/user" $tgtWebSession
 
                         write-host "User $($tgtUser.username) ($($tgtUser.id)) added to role $($tgtRole.rolename) ($($tgtRole.id))"
                     }
@@ -726,21 +718,19 @@ function fnTransferConfig ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSe
     # Array of components to transfer:
     $componentList = @("DataProviderStatistics", "Flows", "JobController", "MainObjects", "Njams", "Notification", "Search", "Statistics", "UserManagement")
 
-    Foreach ($component in $componentList) 
-    {
+    Foreach ($component in $componentList) {
         # Get configuration of component Njams from source instance:
         $sourceConfigObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/configuration/$component/*" $srcWebSession
 
         # Loop through source configurations:
-        Foreach ($sourceConfig in $sourceConfigObject)
-        {
+        Foreach ($sourceConfig in $sourceConfigObject) {
             # Define target request body:
             $targetRequestObject = [PSCustomObject]@{
-                "component" = $($sourceConfig.component)
-                "name" = $($sourceConfig.name)
-                "valueType" = $($sourceConfig.valueType)
+                "component"        = $($sourceConfig.component)
+                "name"             = $($sourceConfig.name)
+                "valueType"        = $($sourceConfig.valueType)
                 "publicAccessible" = $($sourceConfig.publicAccessible)
-                "value" = $($sourceConfig.value)
+                "value"            = $($sourceConfig.value)
             }
 
             # Convert custom object to JSON:
@@ -847,8 +837,7 @@ function fnTransferDomainObjectPrivs ($srcInstance, $srcWebSession, $tgtInstance
     $sourceDomainObjects = fnGetDomainObjectByPath $srcInstance $srcWebSession $objectPath
 
     if ($sourceDomainObjects) {
-        Foreach ($sourceDO in $sourceDomainObjects) 
-        {
+        Foreach ($sourceDO in $sourceDomainObjects) {
             # Get corresponding domain object from target instance:
             $targetDomainObject = fnGetDomainObjectByPath $tgtInstance $tgtWebSession $objectPath
 
@@ -863,8 +852,7 @@ function fnTransferDomainObjectPrivs ($srcInstance, $srcWebSession, $tgtInstance
                     $sourceDomainObjectList = fnGetDomainObjectListByPath $srcInstance $srcWebSession $objectPath
 
                     # Loop through list of domain objects and transfer privileges:
-                    Foreach ($sourceDomainObject in $sourceDomainObjectList) 
-                    {
+                    Foreach ($sourceDomainObject in $sourceDomainObjectList) {
                         fnTransferDomainObjectPrivs $srcInstance $srcWebSession $tgtInstance $tgtWebSession $($sourceDomainObject.objectPath) $overwrite
                     }
                 }
@@ -894,8 +882,7 @@ function fnSetDomainObjectPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tg
     $examineNextLevel = $false
 
     # Loop through permissions granted to roles for domain object of source instance:
-    Foreach ($sourceDOPriv in $sourceDOPrivilegeObject) 
-    {
+    Foreach ($sourceDOPriv in $sourceDOPrivilegeObject) {
         # Find equivalent role in target instance:
         $targetRole = $targetRolesBasicObject | where-object { $_.rolename -eq $($sourceDOPriv.rolename) }
 
@@ -905,17 +892,13 @@ function fnSetDomainObjectPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tg
             # Continue looping, if role exists in target instance:
             if ($targetRole) {
                 # Loop through categories of privileges in source instance:
-                Foreach ($sourceDOPrivCategory in $sourceDOPriv.categories) 
-                {
+                Foreach ($sourceDOPrivCategory in $sourceDOPriv.categories) {
                     # Loop through category names:
-                    foreach ($sourceCategoryName in $sourceDOPrivCategory.psobject.properties.name) 
-                    {
+                    foreach ($sourceCategoryName in $sourceDOPrivCategory.psobject.properties.name) {
                         # Loop through privileges:
-                        Foreach ($sourcePriv in $sourceDOPrivCategory.$($sourceCategoryName)) 
-                        {
+                        Foreach ($sourcePriv in $sourceDOPrivCategory.$($sourceCategoryName)) {
                             # Loop through privilege names:
-                            foreach ($privName in $sourcePriv.psobject.properties.name) 
-                            {
+                            foreach ($privName in $sourcePriv.psobject.properties.name) {
                                 # write-host $sourcePriv.$($privName)
                                 # Grant permission on domain object for role in target instance:
                                 try {
@@ -977,12 +960,12 @@ function fnSetDomainObjectPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tg
 }
 
 function fnTransferSystemPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tgtWebSession) {
-# This ifunction transfers all system privileges of roles in source instance to roles in target instance.
-# 1. Get all roles of source instance
-# 2. Get all roles of target instance
-# 3. Get all available system privileges of source instance
-# 4. Get all available system privileges of target instance
-# 5. Loop through roles of source instance, determine sysprivs of each role, and apply sysprivs to role in target instance
+    # This ifunction transfers all system privileges of roles in source instance to roles in target instance.
+    # 1. Get all roles of source instance
+    # 2. Get all roles of target instance
+    # 3. Get all available system privileges of source instance
+    # 4. Get all available system privileges of target instance
+    # 5. Loop through roles of source instance, determine sysprivs of each role, and apply sysprivs to role in target instance
 
     # 1. Get all roles of source instance:
     $sourceRolesObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/usermanagement/roles/basic" $srcWebSession
@@ -1019,21 +1002,19 @@ function fnTransferSystemPrivs ($srcInstance, $srcWebSession, $tgtInstance, $tgt
     }
 
     # 5. Loop through roles of source instance, determine sysprivs of each role, and apply sysprivs to role in target instance:
-    Foreach ($sourceRole in $sourceRolesObject | where-object { [string]::IsNullOrEmpty($_.hasSystemPrivileges) })
-    {
+    Foreach ($sourceRole in $sourceRolesObject | where-object { [string]::IsNullOrEmpty($_.hasSystemPrivileges) }) {
         # Get list of sysprivs of role in source instance:
         $sourceRoleSystemPrivilegeObject = fnCallRestApi "GET" $reqHeader "application/json" $null "$srcInstance/api/usermanagement/roles/$($sourceRole.id)/privileges" $srcWebSession
 
         if ($sourceRoleSystemPrivilegeObject) {
             # Loop through system privileges of role in source instance:
-            Foreach ($sourceRoleSystemPrivilege in $sourceRoleSystemPrivilegeObject) 
-            {
+            Foreach ($sourceRoleSystemPrivilege in $sourceRoleSystemPrivilegeObject) {
                 # Get corresponding role in target instance:
-                $targetRole = $targetRolesObject | where-object { $_.rolename -eq $($sourceRole.rolename)}
+                $targetRole = $targetRolesObject | where-object { $_.rolename -eq $($sourceRole.rolename) }
 
                 if ($targetRole) {
                     # Get corresponding syspriv id in target instance:
-                    $targetSyspriv = $targetSystemPrivilegesObject | where-object { $_.privilegeRightName -eq $($sourceRoleSystemPrivilege.privilegeRightName)}
+                    $targetSyspriv = $targetSystemPrivilegesObject | where-object { $_.privilegeRightName -eq $($sourceRoleSystemPrivilege.privilegeRightName) }
 
                     if ($targetSyspriv) {
                         # Geant system privilege to role in target instance:
@@ -1291,8 +1272,7 @@ if ($sourceUserId -and $targetUserId) {
                 $srcDomainObjectList = fnGetDomainObjectListByPath $sourceInstance $sourceSession $objectPath
 
                 # Loop through list of domain objects on root level and transfer privileges:
-                Foreach ($srcDO in $srcDomainObjectList) 
-                {
+                Foreach ($srcDO in $srcDomainObjectList) {
                     $result = fnTransferDomainObjectPrivs $sourceInstance $sourceSession $targetInstance $targetSession $($srcDO.objectPath) $overwrite
                 }
             }
