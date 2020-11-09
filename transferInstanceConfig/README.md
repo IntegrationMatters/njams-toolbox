@@ -15,6 +15,8 @@ The following configurations can be transfered:
 * **mail** - settings of a smtp server
 * **argos** - settings of Argos configuration
 * **user** - user accounts and roles including assignments
+* **objectPrivilege** - domain object permissions for roles
+* **systemPrivilege** - system privileges for roles
 
 If you do not specify a particular configuration, all configurations are transferred to the target nJAMS instance.
 The script outputs the transferred configurations.
@@ -59,6 +61,10 @@ SYNTAX
                                   [[-ldap]]
                                   [[-mail]]
                                   [[-user]]
+                                  [[-objectPrivilege]]
+                                  [[-systemPrivilege]]
+                                  [[-domainObjectPath]]
+                                  [[-roleName]]
                                   [<CommonParameters>]
 ```
 
