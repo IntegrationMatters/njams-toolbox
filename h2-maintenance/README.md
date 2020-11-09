@@ -24,7 +24,7 @@ First the script exports the nJAMS H2 database file `njams.mv.db` into a tempora
 
 ## Requirements:
 
-  - Java is required
+  - Java 8 or higher is required
   - Make sure there is enough disk space available on the machine, where you execute the script. 
   - You need read/write permission on working directory
   - If applicable, you need read/write permission on nJAMS installation directory
