@@ -10,13 +10,13 @@ This maintenance script rebuilds the nJAMS H2 database. Unused space will be rel
 First the script exports the nJAMS H2 database file `njams.mv.db` into a temporary ZIP file. Secondly a new H2 database file is created based on the export.
 
   1. Copy the script to a working folder of a Linux/Unix machine that has sufficient free disk space and has installed Java 8 or higher.
-  2. Shutdown nJAMS Server.
+  2. Shutdown nJAMS Server, respectively WildFly by selecting "Shutdown" in nJAMS UI at "Administration / System control / Deployment".
   3. Copy `njams.mv.db` from `<njams-installation>/data/h2/` of your nJAMS Server machine to the working folder of this machine.
   4. Copy H2 JDBC driver jar file from `<njams-installation>/wildfly16/modules/system/layers/base/com/h2database/h2/main/` of your nJAMS Server machine to the working folder.
   5. Open a terminal and CD to the working folder.
-  6. Run the script. If applicable, enter the credentials to access nJAMS H2 database by specifying username and password. The new nJAMS H2 database is created in subfolder `target` of your working folder. You will notice, the new file is significantly smaller than the original file.
+  6. Run the script. Specify credentials to access nJAMS H2 database by specifying username and password. The new nJAMS H2 database is created in subfolder `target` of your working folder. You will notice, the new file is significantly smaller than the original file.
   7. Replace the original nJAMS H2 database file on nJAMS Server machine with the newly created H2 database file.
-  8. Restart nJAMS Server.
+  8. Restart nJAMS Server by starting WildFly again. Use "startAll.sh" at "<njams_installation>/bin/" to start WildFly.
 
 ## Characteristics:
 

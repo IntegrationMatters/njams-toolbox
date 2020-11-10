@@ -29,7 +29,7 @@
     1. Copy the script to a working folder of your nJAMS Server machine. Make sure this machine has sufficient free disk space and has installed Java 8 or higher.
     2. Stop nJAMS Server instance, respectively shutdown WildFly process.
     3. Open Powershell and CD to the working folder.
-    4. Run the script. Specify credentials to H2 database and specify the path to your nJAMS installation, e,g, "/opt/njams/".
+    4. Run the script. If applicable, specify credentials to H2 database and enter the path to your nJAMS installation, e,g, "/opt/njams/".
        -> The script copies H2 database file and JDBC driver file from nJAMS installation folder to working folder and replaces the original H2 database file with the newly created file. 
     5. Restart nJAMS Server by starting WildFly again.
 
