@@ -18,7 +18,7 @@ There are basically two options to use the script.
   3. Copy `njams.mv.db` from `<njams-installation>/data/h2/` of your nJAMS Server machine to the working folder of this machine.
   4. Copy H2 JDBC driver jar file from `<njams-installation>/wildfly16/modules/system/layers/base/com/h2database/h2/main/` of your nJAMS Server machine to the working folder.
   5. Open Powershell and CD to the working folder.
-  6. Run the script. If applicable, specify credentials to access nJAMS H2 database by specifying parameters `-username` and `-password`. The new nJAMS H2 database is created in subfolder `target` of your working folder. You will notice, the new file is significantly smaller than the original file.
+  6. Run the script. If applicable, specify credentials to access nJAMS H2 database by entering parameters `-dbUser` and `-password`. The new nJAMS H2 database is created in subfolder `target` of your working folder. You will notice, the new file is significantly smaller than the original file.
   7. Replace the original nJAMS H2 database file on nJAMS Server machine with the newly created H2 database file.
   8. Restart nJAMS Server.
 
