@@ -18,6 +18,9 @@ The script can be executed on any Windows, Linux, or Mac machine within the same
 * script runs on Windows, Linux, and macOS using PowerShell Core 7 or Windows PowerShell 5
 * output can be formatted individually by common PowerShell `format` cmdlet
 
+## Demo:
+![setLogLevel-demo](img/setLogLevel-demo.gif)
+
 ## Usage:
 
 ```
