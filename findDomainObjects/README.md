@@ -18,6 +18,10 @@ The script can be executed on any Linux/Unix, Windows, or Mac machine within the
 * script runs on Linux and macOS using Powershell 7 or on Windows using Windows PowerShell 5 or PowerShell 7
 * output can be formatted individually by common PowerShell `format` cmdlet
 
+## Demo:
+How to find domain objects of category 'MULE', where data retention is different from default of 7 days:
+![findDomainObjects-demo](img/findDomainObjects-demo.gif)
+
 ## Usage:
 
 ```

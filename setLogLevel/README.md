@@ -19,6 +19,8 @@ The script can be executed on any Windows, Linux, or Mac machine within the same
 * output can be formatted individually by common PowerShell `format` cmdlet
 
 ## Demo:
+
+How to set the log level to "ERROR" for specific domain objects:
 ![setLogLevel-demo](img/setLogLevel-demo.gif)
 
 ## Usage:

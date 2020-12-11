@@ -37,6 +37,10 @@ There are basically two options to use the script.
 * supports H2 database files of nJAMS Server 5.x
 * runs on Windows, Linux, and macOS using PowerShell Core 7 or Windows PowerShell 5
 
+## Demo:
+How to reorganize nJAMS H2 database using automatic approach:
+![h2-maintenance-demo](img/h2-maintenance-demo.gif)
+
 ## Usage:
 
 ```
