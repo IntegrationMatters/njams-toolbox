@@ -10,9 +10,9 @@ You can specify individual configurations to transfer.
 The following configurations can be transfered:
 
 * **config** - basic settings of an nJAMS Server instance such as name of instance, search options, global retention settings, etc.
-* **ldap** - settings of a LDAP configuration
+* **ldap** - settings of LDAP connection
 * **dataProvider** - settings of Data Providers including JMS and JNDI configurations
-* **mail** - settings of a smtp server
+* **mail** - settings of smtp server connection
 * **argos** - settings of Argos configuration
 * **user** - user accounts and roles including assignments
 * **objectPrivilege** - domain object permissions for roles
@@ -45,6 +45,10 @@ The script can be executed on any Linux/Unix, Windows, or Mac machine within the
 * Source and target nJAMS instances must be up and running
 * Specified user accounts for source and target instances must be of role 'admin'. 
 * Double check if the target instance is correct and its configuration may be modified.
+
+## Demo:
+How to transfer Data Providers including correspondig JNDI/JMS connections from a source nJAMS instance to a target nJAMS instance, skipping existing configurations instead of replacing them:
+![transferInstanceConfig-demo](img/transferInstanceConfig-demo.gif)
 
 ## Usage:
 
