@@ -24,6 +24,11 @@ First the script exports the nJAMS H2 database file `njams.mv.db` into a tempora
 * supports H2 database files of nJAMS Server 5.x
 * runs on Linux/Unix using bash
 
+## Demo:
+
+How to reorganize nJAMS H2 database:
+![h2-maintenance-demo](img/h2-maintenance-demo-bash.gif)
+
 ## Usage:
 
 ```

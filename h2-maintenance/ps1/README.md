@@ -39,7 +39,7 @@ There are basically two options to use the script.
 
 ## Demo:
 How to reorganize nJAMS H2 database using automatic approach:
-![h2-maintenance-demo](img/h2-maintenance-demo.gif)
+![h2-maintenance-demo](img/h2-maintenance-demo-ps1.gif)
 
 ## Usage:
 
