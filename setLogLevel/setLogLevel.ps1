@@ -55,11 +55,10 @@
     https://www.integrationmatters.com/
 
 .NOTES
-    Version:    1.0.2
+    Version:    1.0.3
     Copyright:  (c) Integration Matters
     Author:     Stephan Holters
-    Date:       September 2020
-
+    Date:       June 2021
 #>
 
 param (
@@ -129,10 +128,56 @@ function fnSetLogLevel ([string]$doId, [string]$doType) {
     }
     
     # Walk through domain object hierarchy starting from object of given id and type:
+    $skipSubElements = $false
+
     Foreach ($do in $domainObjects)
     {
+        # If domain object is Client, check Client availability:
+        if ([string]$do.client -eq "True") {
+            $skipSubElements = $false
+
+            try {
+                if ($PSVersionTable.PSEdition -eq "Core") {
+                    $processDomainObject = Invoke-RestMethod -Method GET -Header $myHeaderAcceptJson -ContentType "application/json" -SkipCertificateCheck -uri "$instance/api/domainobject/refresh/$($do.id)" -WebSession $mySession
+                }
+                else {
+                    $processDomainObject = Invoke-RestMethod -Method GET -Header $myHeaderAcceptJson -ContentType "application/json" -uri "$instance/api/domainobject/refresh/$($do.id)" -WebSession $mySession
+                }
+            }
+            catch {
+                if ($PSVersionTable.PSEdition -eq "Core") {
+                    $parsedError = $_.ErrorDetails.Message | ConvertFrom-Json
+                }
+                else {
+                    $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                    $reader.BaseStream.Position = 0
+                    $reader.DiscardBufferedData()
+                    $parsedError = $reader.ReadToEnd() | ConvertFrom-Json
+                }
+
+                # If nJAMS Client is not responding skip sub elements and continue:
+                if ($($parsedError.errorCode) -eq "00102" -or
+                    $($parsedError.errorCode) -eq "00103") {
+                    
+                    write-host "$($parsedError.message) - skip sub elements."
+
+                    # When Client is not available, skip sub elements:
+                    $skipSubElements = $true
+
+                    continue
+                }
+                # Else print error and exit script.
+                else {
+                    write-host "Error calling nJAMS Rest/API due to:" -ForegroundColor Red
+                    write-host "$_.Exception.Message"
+
+                    Exit
+                }
+            }
+        }
+
         # If domain object has no children items:
-        if ([string]$do.hasChildren -eq "False") {
+        if ([string]$do.hasChildren -eq "False" -and $skipSubElements -eq $false) {
             # If domain object is of type "process" and matches filter:
             if ([string]$do.type -like "*process*" -and $do.name -match $domainObjectFilter) {
                 try {
@@ -177,7 +222,11 @@ function fnSetLogLevel ([string]$doId, [string]$doType) {
                     # If nJAMS Client is not responding continue with next domain object:
                     if ($($parsedError.errorCode) -eq "00102" -or
                         $($parsedError.errorCode) -eq "00103") {
-                        write-host "$($parsedError.message) - script continues."
+                        
+                        # When Client is not available, skip sub elements:
+                        $skipSubElements = $true
+
+                        write-host "$($parsedError.message) - skip sub elements."
 
                         continue
                     }
