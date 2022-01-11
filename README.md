@@ -19,3 +19,7 @@ This repository contains tools that can help you with the daily use of nJAMS. Le
 * **transferInstanceConfig**
 
   Transfer the configuration settings from a given source nJAMS instance to a given target nJAMS instance. This tool might be useful, if you want to create a new nJAMS instance based on the same settings of an existing nJAMS instance.
+
+* **setDbDialect**
+
+  Set DB dialect in WildFly configuration in order to use Oracle 19 or higher with nJAMS Server.

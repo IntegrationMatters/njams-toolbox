@@ -1,0 +1,30 @@
+# Put this file in JBOSS_HOME and execute it with command:
+# $JBOSS_HOME/bin/jboss-cli.sh -c --file=createNewDriverAndSetDialect.cli
+#
+# Before using this file please change <PATH_TO_DRIVER_JAR_FILE> to real value.
+
+
+# Add new Module for Oracle Driver (relates to JAR file)
+try
+	module add --name=com.oracle19 --resources=<PATH_TO_DRIVER_JAR_FILE> --dependencies=javax.api,javax.transaction.api
+catch
+	echo "Module com.oracle19 already present. Continue..."
+end-try
+
+# Add Oracle Driver
+try
+/subsystem=datasources/jdbc-driver=oracle19:add(driver-name="oracle19",driver-module-name="com.oracle19",driver-class-name=oracle.jdbc.OracleDriver)
+catch
+	echo "Driver oracle19 already present. Continue..."
+end-try
+
+# Change the Datasource to point to new Driver
+/subsystem=datasources/data-source=njamsPool:write-attribute(name=driver-name,value=oracle19)
+
+# Set system property for DB dialect
+try
+	/system-property=njams.db.dialect:add(value="org.hibernate.dialect.Oracle12cDialect")
+catch
+	/system-property=njams.db.dialect:remove
+	/system-property=njams.db.dialect:add(value="org.hibernate.dialect.Oracle12cDialect")
+end-try
