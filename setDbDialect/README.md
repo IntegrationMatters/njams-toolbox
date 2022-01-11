@@ -3,9 +3,9 @@ Set DB dialect in WildFly configuration in order to use Oracle 19 or higher with
 
 ## Description:
 
-When you plan to migrate your Oracle Database to version 19 or higher, you should also consider to update the database connection of nJAMS Server in terms of updating Oracle JDBC driver and/or configuring db dialect.
+When you plan to migrate your Oracle Database to version 19 or higher, you should also consider to update the database connection of nJAMS Server in terms of configuring db dialect and/or updating Oracle JDBC driver.
 
-The database connection of nJAMS Server is part of the WildFly configuration. This CLI script updates the system property "njams.db.dialect" to "org.hibernate.dialect.Oracle12cDialect" of WildFly.
+The database connection of nJAMS Server is part of the WildFly configuration. This CLI script updates WildFly system property "njams.db.dialect" to "org.hibernate.dialect.Oracle12cDialect".
 
 ## How to use:
 
@@ -33,7 +33,7 @@ In case you also want to update the Oracle JDBC driver at the same time, you can
 
 (1) Copy "createNewDriverAndSetDialect.cli" to <your-njams-installation>/wildfly16/
 
-(2) Copy the new ojdbc.jar file to a location of your choice, e.g. your home directory "~/"
+(2) Copy the new ojdbc.jar file to a location of your choice on your nJAMS Server machine, e.g. your home directory "~/"
 
 (3) Edit script "createNewDriverAndSetDialect.cli" and specify the full path to your ojdbc.jar file at "module add --resources", e.g. module add --name=com.oracle19 --resources="~/ojdbc8.jar" --dependencies=javax.api,javax.transaction.api
 
