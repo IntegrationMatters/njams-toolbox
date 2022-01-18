@@ -1,5 +1,5 @@
 # Put this file in JBOSS_HOME and execute it with command:
-# $JBOSS_HOME/bin/jboss-cli.sh -c --file=createNewJdbcDriver.cli
+# $JBOSS_HOME/bin/jboss-cli.sh -c --file=createNewMssqlJdbcDriver.cli
 #
 # Before using this file please change <PATH_TO_DRIVER_JAR_FILE> to real value, e.g. --resources=~/mssql-jdbc-9.4.1.jre11.jar
 
