@@ -1,0 +1,23 @@
+# Put this file in JBOSS_HOME and execute it with command:
+# $JBOSS_HOME/bin/jboss-cli.sh -c --file=createNewJdbcDriver.cli
+#
+# Before using this file please change <PATH_TO_DRIVER_JAR_FILE> to real value, e.g. --resources=~/mssql-jdbc-9.4.1.jre11.jar
+
+
+# Add new Module for jdbc driver (relates to JAR file)
+try
+	module add --name=njams.com.mssql2019 --resources=<PATH_TO_DRIVER_JAR_FILE> --dependencies=javax.api,javax.transaction.api
+catch
+	echo "Specified module already present. Continue..."
+end-try
+
+# Add jdbc driver
+try
+    /subsystem=datasources/jdbc-driver=njams-mssql2019:add(driver-name="njams-mssql2019",driver-module-name="njams.com.mssql2019",driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver)
+catch
+	echo "Driver njams-mssql2019 already present. Continue..."
+end-try
+
+# Change the Datasource to point to new Driver
+/subsystem=datasources/data-source=njamsPool:write-attribute(name=driver-name,value=njams-mssql2019)
+
