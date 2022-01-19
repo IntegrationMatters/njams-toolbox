@@ -9,11 +9,11 @@ The database connection of nJAMS Server is part of the WildFly configuration. Th
 
 ## How to use:
 
-(1) Copy "setDialect.cli" to "<your-njams-installation>/wildfly16/"
+(1) Copy "setDialect.cli" to "[your-njams-installation]/wildfly16/"
 
 (2) While WildFly is running, execute the script: $JBOSS_HOME/bin/jboss-cli.sh -c --file=setDialect.cli
 
-(3) Restart WildFly. You can use the start/stop scripts in folder <your-njams-installation>/bin
+(3) Restart WildFly. You can use the start/stop scripts in folder [your-njams-installation]/bin
 
 ## Requirements:
 
@@ -31,7 +31,7 @@ In case you also want to update the Oracle JDBC driver at the same time, you can
 
 ## How to use:
 
-(1) Copy "createNewDriverAndSetDialect.cli" to <your-njams-installation>/wildfly16/
+(1) Copy "createNewDriverAndSetDialect.cli" to [your-njams-installation]/wildfly16/
 
 (2) Copy the new ojdbc.jar file to a location of your choice on your nJAMS Server machine, e.g. your home directory "~/"
 
@@ -39,7 +39,7 @@ In case you also want to update the Oracle JDBC driver at the same time, you can
 
 (4) While WildFly is running, execute the script: $JBOSS_HOME/bin/jboss-cli.sh -c --file=createNewDriverAndSetDialect.cli
 
-(5) Restart WildFly. You can use the start/stop scripts in folder <your-njams-installation>/bin
+(5) Restart WildFly. You can use the start/stop scripts in folder [your-njams-installation]/bin
 
 ## Requirements:
 
@@ -57,7 +57,7 @@ In case you want to update the MS SQL JDBC driver, you can use CLI script "creat
 
 ## How to use:
 
-(1) Copy "createNewMssqlJdbcDriver.cli" to <your-njams-installation>/wildfly16/
+(1) Copy "createNewMssqlJdbcDriver.cli" to [your-njams-installation]/wildfly16/
 
 (2) Copy the new mssql-jdbc-9.x.x.jre11.jar file to a location of your choice on your nJAMS Server machine, e.g. your home directory "~/"
 
@@ -65,7 +65,7 @@ In case you want to update the MS SQL JDBC driver, you can use CLI script "creat
 
 (4) While WildFly is running, execute the script: $JBOSS_HOME/bin/jboss-cli.sh -c --file=createNewMssqlJdbcDriver.cli
 
-(5) Restart WildFly. You can use the start/stop scripts in folder <your-njams-installation>/bin
+(5) Restart WildFly. You can use the start/stop scripts in folder [your-njams-installation]/bin
 
 ## Requirements:
 
