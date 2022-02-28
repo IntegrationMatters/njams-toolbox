@@ -38,7 +38,6 @@ param (
 $propertyFile = ($propertyFile -replace '[\\/]?[\\/]$')
 
 # Declare variables for usage in Java command
-$consoleLog = 1
 $jarFile = "njams-replay-plugin-commandline-5.1.1.jar"
 
 # This function reads control file 'replay.properties' from source path and
@@ -281,21 +280,3 @@ if ($ctrl) {
     }
 }
 
-
-<#
-java -jar njams-replay-plugin-commandline-5.1.1.jar -?
-
-
-java -jar njams-replay-plugin-commandline-5.1.1.jar `
-    -i admin admin http://vslnjams03:38080/njams/ `
-    -q -sf 2022-02-21T11:00:00 -st 2022-02-21T11:30:00 `
-    -sp DO ">fs_approval>CustomerServices>" `
-    -sst ERROR `
-    -q "eventMessageCode:T_SALESFORCE_UNAVAILABLE" `
-    -qm ids
-
-
-java -jar njams-replay-plugin-commandline-5.1.1.jar `
-    -i admin admin http://vslnjams03:38080/njams/ `
-    -rf ids
-#>
