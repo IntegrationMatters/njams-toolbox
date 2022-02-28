@@ -23,3 +23,8 @@ This repository contains tools that can help you with the daily use of nJAMS. Le
 * **setDbDialect**
 
   Set DB dialect in WildFly configuration in order to use Oracle 19 or higher with nJAMS Server.
+
+* **bulkReplay**
+
+  Query and replay process executions of a given nJAMS instance using nJAMS Replay Command line tool based on a configuration file.
+
