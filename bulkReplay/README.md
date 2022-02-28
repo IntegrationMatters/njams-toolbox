@@ -19,12 +19,6 @@ This script reads the content of the configuration file "replay.properties", que
 4. Execute this script
 
 
-## Characteristics:
-
-* reorganizes nJAMS H2 database by rebuilding H2 database file
-* supports H2 database files of nJAMS Server 5.x
-
-
 ## Requirements:
 
   - Java 11 or higher is required
