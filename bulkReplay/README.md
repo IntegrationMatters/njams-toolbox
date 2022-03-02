@@ -14,6 +14,7 @@ This script reads the content of the configuration file "replay.properties", que
 ## Requirements:
 
   - Java 11 or higher is required
+  - PowerShell is required, see prerequisites below
   - Make sure there is enough disk space available on the machine, where you execute the script. 
   - You need read/write permission on working directory
 
@@ -21,9 +22,8 @@ This script reads the content of the configuration file "replay.properties", que
 ## Usage:
 
 1. Copy the content of this repository to a folder on your machine
-2. Make sure Java 11 is installed on this machine
-3. Edit "replay.properties" file according to your needs
-4. Execute this script
+2. Edit "replay.properties" file according to your needs
+3. Execute this script
 
 ```
 SYNTAX
