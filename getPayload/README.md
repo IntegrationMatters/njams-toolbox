@@ -14,7 +14,6 @@ This script authenticates against a given nJAMS instance and searches for proces
 
 ## Requirements:
 
-  - Java 11 or higher is required
   - PowerShell is required, see prerequisites below
   - You need read/write permission on working directory
 
