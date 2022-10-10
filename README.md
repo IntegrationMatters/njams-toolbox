@@ -28,3 +28,6 @@ This repository contains tools that can help you with the daily use of nJAMS. Le
 
   Query and replay process executions of a given nJAMS instance using nJAMS Replay Command line tool based on a configuration file.
 
+* **getPayload**
+
+  Outputs payload data into files from activities of process executions of a given process and a period of time.
