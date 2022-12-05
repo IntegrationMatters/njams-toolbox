@@ -30,4 +30,8 @@ This repository contains tools that can help you with the daily use of nJAMS. Le
 
 * **getPayload**
 
-  Outputs payload data into files from activities of process executions of a given process and a period of time.
+  Outputs payload data from nJAMS Server into files from activities of process executions of a given process and a period of time.
+
+* **njamsAgent**
+
+  This script requires an existing installation of nJAMS Agent 4.1 or higher and allows to manage nJAMS Agent by a universal PowerShell script.
