@@ -4,7 +4,7 @@ Script to start/stop nJAMS Agent on Linux or Windows machines.
 ## Description:
 
 nJAMS Agent collects metrics from this machine and sends these metrics to a dedicated nJAMS instance.
-This script starts and stops nJAMS Agent based on the configuration in '<njams-agent-home>/config' by default.
+This script starts and stops nJAMS Agent based on the configuration in '<<njams-agent-home>>/config' by default.
 Before you run this script, nJAMS Agent should be configured. Edit 'njams_agent.conf', respectively 'njams_agent_windows.conf', and configure input and output plugins.
 Please refer to https://docs.integrationmatters.com/projects/agent for more information.
 
