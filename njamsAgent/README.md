@@ -25,8 +25,8 @@ This script requires an existing installation of nJAMS Agent 4.1 or higher and r
 
 ## Setup:
 
-1. Copy 'njams_agent.ps1' into nJAMS Agent's bin folder: '<njams-agent-home>/bin'.
-2. Edit 'njams_agent.conf', respectively 'njams_agent_windows.conf', in '<njams-agent-home>/config' according to your needs
+1. Copy 'njams_agent.ps1' into nJAMS Agent's bin folder: `<njams-agent-home>/bin`.
+2. Edit 'njams_agent.conf', respectively 'njams_agent_windows.conf', in `<njams-agent-home>/config` according to your needs
 3. Run this script
 
 ```
