@@ -38,6 +38,7 @@ SYNTAX
                       [-service]
                       [-install]
                       [-uninstall]
+                      [-config <string>]
                       [<CommonParameters>]
 ```
 

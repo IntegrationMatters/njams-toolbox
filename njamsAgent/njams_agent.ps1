@@ -39,6 +39,9 @@
 .PARAMETER uninstall
     Uninstalls nJAMS Agent Windows Service. Requires elevated user privilege and can only be used on Windows systems.
 
+.PARAMETER configFile
+    References a full path to the nJAMS Agent config file. If this parameter is not specified, the default config file for Linux, respectively Windows, is used.
+
 .EXAMPLE
     ./njams_agent.ps1 -start
     Starts an process instance of nJAMS Agent.
@@ -63,12 +66,16 @@
     ./njams_agent.ps1 -service -status
     Shows the status of nJAMS Agent Windows Service.
 	
+.EXAMPLE
+    ./njams_agent.ps1 -start -config "/opt/njams/agent/config/njams_agent_https.conf"
+    Start nJAMS Agent using config file 'njams_agent_https.conf'.
+	
 .LINK
     https://docs.integrationmatters.com/projects/agent
     https://www.integrationmatters.com/
 
 .NOTES
-    Copyright: (c) 2021 Integration Matters
+    Copyright: (c) 2021, 2022 Integration Matters
 #>
 
 param(
@@ -78,11 +85,12 @@ param(
     [switch]$status,
     [switch]$service,
     [switch]$install,
-    [switch]$uninstall
+    [switch]$uninstall,
+    [string]$configFile
 )
 
 # Change globals here, if required:
-$agentConfig = "njams_agent.conf"
+$defaultConfig = "njams_agent.conf"
 $agentBin = "njams_agent"
 $pwshCmd = "pwsh"
 
@@ -94,8 +102,16 @@ if ($PSVersionTable.PSEdition -ne "Core") {
 
 # For Windows systems set corresponding config for nJAMS Agent:
 if ($IsWindows) {
-    $agentConfig = "njams_agent_windows.conf"
+    $defaultConfig = "njams_agent_windows.conf"
     $agentBin = "njams_agent.exe"
+}
+
+# Use specified or default config file:
+if ($configFile) {
+    $agentConfig = $configFile
+}
+else {
+    $agentConfig = "$PSScriptRoot/../config/$defaultConfig"
 }
 
 # For using TIBCO EMS input/output plugin, make sure TIBCO EMS Client libs are installed on this machine and are available in classpath.
@@ -105,7 +121,7 @@ if ($IsWindows) {
     #   if (($env:path -like "*" + $EMS_HOME + "\bin*") -eq $False) {
     #       $env:path += ";" + $EMS_HOME + "\bin"
     #   }
-    # Option 2: Add TIBCO EMS bin path to System Variable 'path'. 
+    # Option 2: Add TIBCO EMS bin path to System Variable 'path'. Use this option, if you want to start nJAMS Agent as Windows Service.
 }
 if ($IsLinux) {
     # On Linux set $env:LD_LIBRARY_PATH to TIBCO EMS Client libs path.
@@ -182,7 +198,8 @@ if ($PSBoundParameters.ContainsKey('start') -eq $True) {
 
         write-output "Starting nJAMS Agent..."
 
-        $processObject = Start-Process -NoNewWindow -FilePath "$PSScriptRoot/$agentBin" -PassThru -ArgumentList "--config $PSScriptRoot/../config/$agentConfig" -RedirectStandardError "$PSScriptRoot/../log/console.log"
+#        $processObject = Start-Process -NoNewWindow -FilePath "$PSScriptRoot/$agentBin" -PassThru -ArgumentList "--config $agentConfig" -RedirectStandardError "$PSScriptRoot/../log/console.log"
+        $processObject = Start-Process -FilePath "$PSScriptRoot/$agentBin" -PassThru -ArgumentList "--config $agentConfig" -RedirectStandardError "$PSScriptRoot/../log/console.log"
 
         if ($processObject) {
 
@@ -357,7 +374,7 @@ if ($PSBoundParameters.ContainsKey('restart') -eq $True) {
 
         write-output "Starting nJAMS Agent..."
 
-        $processObject = Start-Process -NoNewWindow -FilePath "$PSScriptRoot/$agentBin" -PassThru -ArgumentList "--config $PSScriptRoot/../config/$agentConfig" -RedirectStandardError "$PSScriptRoot/../log/console.log"
+        $processObject = Start-Process -NoNewWindow -FilePath "$PSScriptRoot/$agentBin" -PassThru -ArgumentList "--config $agentConfig" -RedirectStandardError "$PSScriptRoot/../log/console.log"
 
         if ($processObject) {
 
@@ -458,7 +475,7 @@ if ($PSBoundParameters.ContainsKey('install') -eq $True -and $IsWindows) {
     
         write-output "Installing nJAMS Agent Windows Service..."
         
-        $arguments = "& $PSScriptRoot/$agentBin --service install --config $PSScriptRoot/../config/$agentConfig --config-directory $PSScriptRoot/../config/njams_agent.d"
+        $arguments = "& $PSScriptRoot/$agentBin --service install --config $agentConfig --config-directory $PSScriptRoot/../config/njams_agent.d"
         start-process -FilePath $pwshCmd -Verb runAs -ArgumentList "-c", $arguments
 
         write-output "nJAMS Agent Windows Service installed."
