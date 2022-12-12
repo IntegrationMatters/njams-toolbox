@@ -22,12 +22,15 @@
     Can be used with additional option '-service' to stop nJAMS Agent Windows Service.
 
 .PARAMETER restart
-    Restart process instance of nJAMS Agent. 
+    Restarts process instance of nJAMS Agent. 
     Can be used with additional option '-service' to restart nJAMS Agent Windows Service.
 
 .PARAMETER status
     Shows the status of nJAMS Agent, whether process instance is running or stopped.
     Can be used with additional option '-service' to show the current status of nJAMS Agent Windows Service.
+
+.PARAMETER nospawn
+    Starts nJAMS Agent in the same console without spawning. This parameter is optional and useful for analyzing start issues.
 
 .PARAMETER service
     This option is used to run nJAMS Agent as Windows Service and can only be used on Windows systems.
@@ -83,6 +86,7 @@ param(
     [switch]$restart,
     [switch]$stop,
     [switch]$status,
+    [switch]$nospawn,
     [switch]$service,
     [switch]$install,
     [switch]$uninstall,
@@ -198,17 +202,23 @@ if ($PSBoundParameters.ContainsKey('start') -eq $True) {
 
         write-output "Starting nJAMS Agent..."
 
-#        $processObject = Start-Process -NoNewWindow -FilePath "$PSScriptRoot/$agentBin" -PassThru -ArgumentList "--config $agentConfig" -RedirectStandardError "$PSScriptRoot/../log/console.log"
-        $processObject = Start-Process -FilePath "$PSScriptRoot/$agentBin" -PassThru -ArgumentList "--config $agentConfig" -RedirectStandardError "$PSScriptRoot/../log/console.log"
-
-        if ($processObject) {
-
-            # Save pid into file:
-            write-output $processObject.id > $PSScriptRoot/../njams_agent.pid
+        if ($PSBoundParameters.ContainsKey('nospawn') -eq $True) {
+            # Start nJAMS Agent in current console:
+            invoke-expression -Command "$PSScriptRoot/$agentBin --config $agentConfig"
         }
+        else {
+            # Spawn nJAMS Agent in new process/window:
+            $processObject = Start-Process -FilePath "$PSScriptRoot/$agentBin" -PassThru -ArgumentList "--config $agentConfig" -RedirectStandardError "$PSScriptRoot/../log/console.log" 
 
-        write-output "nJAMS Agent pid is $($processObject.id)."
-        write-output " "
+            if ($processObject) {
+
+                write-output $processObject.id > $PSScriptRoot/../njams_agent.pid
+
+                write-output "nJAMS Agent pid is $($processObject.id)."
+                write-output "See console.log for more details."
+                write-output " "
+            }
+        }
     }
 }
 
@@ -218,7 +228,7 @@ if ($PSBoundParameters.ContainsKey('stop') -eq $True) {
     if ($PSBoundParameters.ContainsKey('service') -eq $True -and $IsWindows) {
         # Stop Windows Service of nJAMS Agent.
         # Check for existing Windows Service, before stopping the service:
-        $serviceObject = Get-Service -name "njams_agent"  -ErrorAction SilentlyContinue
+        $serviceObject = Get-Service -name "njams_agent" -ErrorAction SilentlyContinue
 
         if ($serviceObject) {
             if ([string]$serviceObject.Status -eq 'running') {
@@ -368,13 +378,14 @@ if ($PSBoundParameters.ContainsKey('restart') -eq $True) {
                 }
 
                 write-output "nJAMS Agent stopped."
+                write-output "See console.log for more details."
                 write-output " "
             }
         }
 
         write-output "Starting nJAMS Agent..."
 
-        $processObject = Start-Process -NoNewWindow -FilePath "$PSScriptRoot/$agentBin" -PassThru -ArgumentList "--config $agentConfig" -RedirectStandardError "$PSScriptRoot/../log/console.log"
+        $processObject = Start-Process -FilePath "$PSScriptRoot/$agentBin" -PassThru -ArgumentList "--config $agentConfig" -RedirectStandardError "$PSScriptRoot/../log/console.log"
 
         if ($processObject) {
 
