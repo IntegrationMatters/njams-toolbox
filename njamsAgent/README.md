@@ -35,9 +35,11 @@ SYNTAX
                       [-start]
                       [-stop] 
                       [-restart]
+                      [-nospawn]
                       [-service]
                       [-install]
                       [-uninstall]
+                      [-config <string>]
                       [<CommonParameters>]
 ```
 

@@ -22,9 +22,9 @@
     https://github.com/integrationmatters/njams-toolbox
 
 .NOTES
-    Version:    1.0.0
+    Version:    1.1.0
     Copyright:  (c) Integration Matters
-    Date:       February 2022
+    Date:       December 2022
 #>
 
 param (
@@ -38,7 +38,7 @@ param (
 $propertyFile = ($propertyFile -replace '[\\/]?[\\/]$')
 
 # Declare variables for usage in Java command
-$jarFile = "njams-replay-plugin-commandline-5.1.1.jar"
+$jarFile = "njams-replay-plugin-commandline-5.2.0.jar"
 
 # This function reads control file 'replay.properties' from source path and
 # returns hash table of properties:
@@ -99,13 +99,29 @@ $ctrl = fnReadControlFile($propertyFile)
 # Execute query command:
 if ($ctrl) {
 
-    $argList = @("-jar", $jarFile)
-
     try {
 
         # This Java command...
         if($env:JAVA_HOME)
         {
+            # If applicable, add truststore/pw for https connection to nJAMS instance:
+            if ($ctrl.Get_Item("trustStore") -and
+                $ctrl.Get_item("trustStorePassword")) {
+
+                if ($ctrl.Get_Item("trustStore").Trim('"') -and 
+                    $ctrl.Get_Item("trustStorePassword").Trim('"')) {
+                        $javaTrustStore = $ctrl.Get_Item("trustStore")
+                        $javaTrustStorePassword = $ctrl.Get_Item("trustStorePassword")
+                            $argList = @("-Djavax.net.ssl.trustStore=./wildcard.integrationmatters.com.jks", "-Djavax.net.ssl.trustStorePassword=njamspw", "-jar", $jarFile)
+                }
+                else {
+                    $argList = @("-Djavax.net.ssl.trustStore=$javaTrustStore", "-Djavax.net.ssl.trustStorePassword=$javaTrustStorePassword", "-jar", $jarFile)
+                }
+            }
+            else {
+                $argList = @("-jar", $jarFile)
+            }
+
             # Add login args to statement:
             if ($ctrl.Get_Item("user") -and 
                 $ctrl.Get_Item("password") -and 
@@ -137,7 +153,7 @@ if ($ctrl) {
             # Execute query command:
             if ($query -or $test) {
 
-                $argQueryCmdList = @("-jar", $jarFile)
+                $argQueryCmdList = $argList
 
                 $argQueryCmdList += "-i", $njamsUser, $njamsPassword, $njamsInstanceURL
 
@@ -223,6 +239,7 @@ if ($ctrl) {
                     NoNewWindow = $true
                     Wait = $true
                 }
+
                 $result = Start-Process @params
 
                 # If Java command line returns (error) message, exit script:
@@ -237,7 +254,7 @@ if ($ctrl) {
 
             # Execute replay command:
             if ($replay -or $test) {
-                $argReplayCmdList = @("-jar", $jarFile)
+                $argQueryCmdList = $argList
                 $argReplayCmdList += "-i", $njamsUser, $njamsPassword, $njamsInstanceURL
                 $argReplayCmdList += "-rf", $queryResultDir
                 $argReplayCmdList += "-rr", "ReplayCmdResult.log"
