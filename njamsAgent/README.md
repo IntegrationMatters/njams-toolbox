@@ -90,7 +90,6 @@ Run `./njams_agent.ps1 -?` to learn more about how to use the script.
   https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-macos?view=powershell-7
 
 
-  ## nJAMS Agent extended config file:
+## nJAMS Agent extended config file:
 
-  Please find also included the extended nJAMS Agent config file `njams_agent.conf` that contains configuration templates of various systems that can be monitored by nJAMS Agent. 
-  
+Please find also included the extended nJAMS Agent config file `njams_agent.conf` that contains configuration templates of various systems that can be monitored by nJAMS Agent. 
