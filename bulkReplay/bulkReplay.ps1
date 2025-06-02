@@ -22,9 +22,9 @@
     https://github.com/integrationmatters/njams-toolbox
 
 .NOTES
-    Version:    1.1.0
+    Version:    1.1.1
     Copyright:  (c) Integration Matters
-    Date:       December 2022
+    Date:       June 2025
 #>
 
 param (
@@ -254,7 +254,7 @@ if ($ctrl) {
 
             # Execute replay command:
             if ($replay -or $test) {
-                $argQueryCmdList = $argList
+                $argReplayCmdList = $argList
                 $argReplayCmdList += "-i", $njamsUser, $njamsPassword, $njamsInstanceURL
                 $argReplayCmdList += "-rf", $queryResultDir
                 $argReplayCmdList += "-rr", "ReplayCmdResult.log"
