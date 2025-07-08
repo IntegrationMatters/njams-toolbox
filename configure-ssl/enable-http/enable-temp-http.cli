@@ -1,0 +1,12 @@
+connect
+
+# Enable HTTP-Listener
+/subsystem=undertow/server=default-server/http-listener=default:write-attribute(name=enabled,value=true)
+
+# Remove Redirect-Filter if exists 
+/subsystem=undertow/server=default-server/host=default-host/filter-ref=http-to-https:remove
+
+# Set Public Interface to 0.0.0.0 
+/interface=public:write-attribute(name=inet-address,value=0.0.0.0)
+
+reload
