@@ -1,0 +1,52 @@
+# === TLS-Configuration===
+/subsystem=elytron/key-store=njamsKeyStore:add(path="${JKS_PATH}",credential-reference={clear-text="${JKS_PASSWORD}"},type=JKS)
+/subsystem=elytron/key-manager=njamsKeyManager:add(key-store=njamsKeyStore,credential-reference={clear-text="${JKS_PASSWORD}"})
+/subsystem=elytron/key-manager=njamsManagementKeyManager:add(key-store=njamsKeyStore,credential-reference={clear-text="${JKS_PASSWORD}"})
+/subsystem=elytron/server-ssl-context=njamsSSLContext:add(protocols=["TLSv1.2"],key-manager=njamsKeyManager)
+/subsystem=elytron/server-ssl-context=njamsManagementSSLContext:add(protocols=["TLSv1.2"],key-manager=njamsManagementKeyManager)
+
+# === Enable HTTPS ===
+/subsystem=undertow/server=default-server/http-listener=default:write-attribute(name=enabled,value=true)
+/subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=enabled,value=true)
+/subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=ssl-context,value="njamsSSLContext")
+/subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=max-post-size,value=104857600)
+
+# === Management-Interface ===
+/core-service=management/management-interface=http-interface:write-attribute(name=ssl-context,value=njamsManagementSSLContext)
+/core-service=management/management-interface=http-interface:write-attribute(name=secure-socket-binding,value=management-https)
+
+# === Set Interfaces ===
+/interface=management:write-attribute(name=inet-address,value="${PUBLIC_IP}")
+/interface=public:write-attribute(name=inet-address,value="${PUBLIC_IP}")
+if (outcome != success) of /interface=management-localhost:read-resource
+    /interface=management-localhost:add(inet-address="127.0.0.1")
+end-if
+
+# === Socket-Bindings ===
+/socket-binding-group=standard-sockets/socket-binding=http:write-attribute(name=interface,value="management")
+/socket-binding-group=standard-sockets/socket-binding=https:write-attribute(name=interface,value="public")
+/socket-binding-group=standard-sockets/socket-binding=management-http:write-attribute(name=interface,value="management-localhost")
+/socket-binding-group=standard-sockets/socket-binding=management-https:write-attribute(name=interface,value="public")
+
+# === Redirect - please comment this block out if not needed ===
+
+# Delete Interface from HTTP-Binding – so that redirect works!
+if (result != undefined) of /socket-binding-group=standard-sockets/socket-binding=http:read-attribute(name=interface)
+    /socket-binding-group=standard-sockets/socket-binding=http:undefine-attribute(name=interface)
+end-if
+
+# Create or update Rewrite-Filter 
+if (outcome != success) of /subsystem=undertow/configuration=filter/rewrite=http-to-https:read-resource
+    /subsystem=undertow/configuration=filter/rewrite=http-to-https:add(target="https://${PUBLIC_IP}:${HTTPS_PORT}%U",redirect=true)
+else
+    /subsystem=undertow/configuration=filter/rewrite=http-to-https:write-attribute(name=target,value="https://${PUBLIC_IP}:${HTTPS_PORT}%U")
+end-if
+
+# Always set Filter-Reference with predicate
+if (outcome == success) of /subsystem=undertow/server=default-server/host=default-host/filter-ref=http-to-https:read-resource
+    /subsystem=undertow/server=default-server/host=default-host/filter-ref=http-to-https:remove()
+end-if
+
+/subsystem=undertow/server=default-server/host=default-host/filter-ref=http-to-https:add(predicate="equals(%p,$HTTP_PORT)")
+
+reload
